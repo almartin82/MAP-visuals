@@ -143,11 +143,16 @@ sgp_small_multiples <- function (
     ) + 
     theme(
      axis.title.y = element_blank()
+    ,axis.title.x = element_blank()
      #facet strips
     ,strip.text.x = element_text(size=rel(0.9))
+    ,panel.border =  element_rect(fill=NA, colour = "gray50", size=1)
+    #,plot.background = element_rect(color = 'black', size = 1)
     ,panel.background = element_blank()
-    ,plot.background = element_blank()
-    ,panel.background = element_blank()
+    ,strip.background = element_blank()
+    ,panel.grid.major = element_blank()
+    ,panel.grid.minor = element_blank()
+
 ) 
    
   return(p)
