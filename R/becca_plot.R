@@ -1,5 +1,4 @@
-becca_plot <-
-function(
+becca_plot <- function(
    df
   ,first_and_spring_only = TRUE
   ,entry_grades = c(-0.7, 4.3)
@@ -115,8 +114,12 @@ function(
   npr_below <- transform(
     npr_below
    ,QUARTILE = ordered(QUARTILE, levels = names(sort(-table(QUARTILE))))
-  )  
-
+  )
+  
+  #FORMAT X AXIS LABELS
+  becca_x_breaks <- sort(unique(final_df$GRADE_LEVEL_SEASON))
+  becca_x_labels <- unlist(lapply(becca_x_breaks, fall_spring_me))  
+  
   #PLOT PLOT PLOT PLOT
   p <- ggplot() +
     
@@ -174,26 +177,37 @@ function(
     
     #clean out some default ggplot formatting elements
     theme(
+      #zero out cetain formatting
       panel.background = element_blank()
      ,plot.background = element_blank()
      ,panel.grid.major = element_blank()
      ,panel.grid.minor = element_blank()
+     #,legend.title=element_blank()
+      
+      #title and axis sizes
+     ,title = element_text(size = rel(0.9))
+     ,axis.title.x = element_text(size = rel(0.9))
      ,axis.text.y = element_blank()
-     ,legend.title=element_blank()
+     
+     ,plot.margin = rep(unit(0,"null"),4)
+     #,legend.margin = rep(unit(0,"null"),4)
     ) +
     
     #format text
     theme(
-      title = element_text(size = rel(1.5))
      #,axis.title = element_text(size = rel(1.75))
+    ) + scale_x_continuous(
+      breaks = becca_x_breaks
+     ,labels = becca_x_labels
     )
+
   
-  legend_labels = c('Bottom', 'Second', 'Third', 'Top')
+  legend_labels = c('1st', '2nd', '3rd', '4th')
   
   #color style?
   if(color_scheme == 'KIPP Report Card') {
     p <- p +
-                      #dark gray, light gray, light orange, dark orange
+      #dark gray, light gray, light orange, dark orange
       scale_fill_manual(
         values = c(
           rgb(207, 204, 193, max = 255)
@@ -201,6 +215,7 @@ function(
          ,rgb(254, 188, 17, max = 255)
          ,rgb(247, 148, 30, max = 255)
         )
+       ,name = 'Quartiles' 
        ,labels = legend_labels
       )
   } else if (color_scheme == 'Sequential Blues') {
@@ -214,7 +229,6 @@ function(
      ,labels = legend_labels
     )
   }
-
   
   #title?
   if (title_text != FALSE) {
@@ -232,6 +246,20 @@ function(
     p <- p + facet_grid(as.formula(facets))
   }
   #no facet specified = no need to do anything (implicit)
+
+  #legend formatting stuff
+  p <- p + guides(
+     fill = guide_legend(
+      #make it a little smaller
+       title.theme = element_text(
+         angle = 0
+        ,size = rel(8)
+       )
+      ,keywidth = .5
+      ,keyheight = .5
+      #flips the order
+      ,reverse = TRUE)
+  )
   
   return(
     list(p, final_df)
