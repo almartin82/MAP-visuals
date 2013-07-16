@@ -75,7 +75,8 @@ strand_boxes <- function (df) {
      ,fill = factor(GOAL_NAME)
     )
   ) + 
-  geom_boxplot() +
+  geom_boxplot(
+    outlier.size = 0) +
   coord_flip() + 
   geom_jitter(
     position = position_jitter(width = .15)
@@ -93,9 +94,13 @@ strand_boxes <- function (df) {
   labs(
     x = 'RIT Score'
    ,y = 'Goal Name'
+  ) +
+  theme(
+    panel.background = element_blank()
+   ,plot.background = element_blank()
+   ,panel.grid.major = element_blank()
+   ,panel.grid.minor = element_blank()
   )
-  
-  p
   
   return(p)
 }
