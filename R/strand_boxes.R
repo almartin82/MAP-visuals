@@ -89,6 +89,10 @@ strand_boxes <- function (df) {
   ,fun.y = mean
   ,geom = 'text'
   ,size = 8
+  ) +
+  labs(
+    x = 'RIT Score'
+   ,y = 'Goal Name'
   )
   
   p
