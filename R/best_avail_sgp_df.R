@@ -14,9 +14,9 @@ best_avail_sgp_df <- function (
  setkey(dt, PERIOD_STRING)
  
  #subset into 3 data tables
- preferred <- copy(dt[prefer_period,])
- backup_1 <- copy(dt[backup_period_1,])
- backup_2 <- copy(dt[backup_period_2,])
+ preferred <- copy(dt[prefer_period])
+ backup_1 <- copy(dt[backup_period_1])
+ backup_2 <- copy(dt[backup_period_2])
   
  #get uniques in df
  #record is defined by studentid, (ending) year, measuremenscale

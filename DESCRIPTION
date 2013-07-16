@@ -7,3 +7,7 @@ Author: Andrew Martin, Chris Haid
 Maintainer: <amartin@teamschools.org>
 Description: Functions that support analysis of NWEA MAP assessment data
 License: Creative Commons Attribution-NonCommercial-NoDerivs
+Imports:
+    ggplot2,
+    data.table,
+    grid
