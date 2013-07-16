@@ -1,11 +1,9 @@
 \name{becca_plot}
 \alias{becca_plot}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{
-%%  ~~function to do ... ~~
-}
+\title{Makes Becca's KIPP Report Card plots in R}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Takes a CDF 'TEAM Style' and returns a list with 1) a ggplot object and 2) a data frame with aggregate data for each quartile.
 }
 \usage{
 becca_plot(df, first_and_spring_only = TRUE, entry_grades = c(-0.7, 4.3), color_scheme = "KIPP Report Card", facets = FALSE, facet_opts = FALSE, title_text = FALSE)
