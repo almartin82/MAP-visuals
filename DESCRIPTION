@@ -1,9 +1,9 @@
-Package: MAP-visuals
+Package: mapvisuals
 Type: Package
 Title: KIPP MAP Visuals
 Version: 1.0
 Date: 2013-06-26
 Author: Andrew Martin, Chris Haid
 Maintainer: <amartin@teamschools.org>
-Description: Functions that support MAP analysis
+Description: Functions that support analysis of NWEA MAP assessment data
 License: Creative Commons Attribution-NonCommercial-NoDerivs
