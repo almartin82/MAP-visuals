@@ -39,15 +39,15 @@ strand_boxes <- function (df) {
   #melt RIT values
   stage_2a <- melt(
       data = stage_1a
-     ,id.vars = names(stage_1)[1:7]
-     ,value.name = names(stage_1)[8:15]
+     ,id.vars = names(stage_1a)[1:7]
+     ,value.name = names(stage_1a)[8:15]
     )
   
   #melt names
   stage_2b <- melt(
       data = stage_1b
-     ,id.vars = names(stage_1)[1:7]
-     ,value.name = names(stage_1)[8:15]
+     ,id.vars = names(stage_1a)[1:7]
+     ,value.name = names(stage_1a)[8:15]
   )
   
   head(stage_2a)
@@ -86,14 +86,14 @@ strand_boxes <- function (df) {
   stat_summary(
    aes(
      label = round(..y..,1)
-     )
+   )
   ,fun.y = mean
   ,geom = 'text'
   ,size = 8
   ) +
   labs(
-    x = 'RIT Score'
-   ,y = 'Goal Name'
+    x = 'Goal Name'
+   ,y = 'RIT Score'
   ) +
   theme(
     panel.background = element_blank()
