@@ -147,9 +147,3 @@ strand_boxes <- function (df) {
   
   return(p)
 }
-
-p <- strand_boxes(df=m6)
-p + guides(fill = FALSE) 
-
-#theme(axis.text.y = element_text(size = rel(1.5)))
-library(stringr)
