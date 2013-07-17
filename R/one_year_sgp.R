@@ -47,8 +47,10 @@ one_year_sgp <- function (
   geom_histogram(
    ,binwidth = 7.5
    ,alpha = 0.85
-   ,color = '#0067AC'
-   ,fill = '#0067AC'
+   #'TEAM blue'
+   #,color = '#0067AC'
+   #,fill = '#0067AC'
+   ,fill = 'gray60'
   ) +    
   #labels
    labs(
