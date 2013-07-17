@@ -65,6 +65,27 @@ strand_boxes <- function (df) {
   
   #drop NA goals
   stage_4 <- stage_3[!is.na(stage_3$GOAL_NAME),]
+  #head(stage_4)
+  y_center <<- min(stage_4$value) + 0.5 * (max(stage_4$value) - min(stage_4$value)) 
+  goal_names <- attributes(factor(stage_4$GOAL_NAME))$levels
+  
+  more_30 <- nchar(goal_names) > 30
+  
+  smart_breaks <- ifelse(more_30, '-\n', '')
+  
+  goal_names_format <<- paste(
+    substr(goal_names, start = 1, stop = 30)
+   ,smart_breaks
+   ,substr(goal_names, start = 31, stop = 100)
+   ,sep = ''
+  )
+  #a data frame of labels!
+  #first - how many non-null goals are there?
+  
+  #str(stage_4$GOAL_NAME)
+  
+  
+  #unique(stage_4[stage_4$value > 0,]
   
   #now make a boxplot
   p <- ggplot(
@@ -74,14 +95,30 @@ strand_boxes <- function (df) {
      ,y = value
      ,fill = factor(GOAL_NAME)
     )
+  ) +
+  #empty
+  geom_jitter(
+    alpha = 0
   ) + 
+  annotate(
+    "text"
+   ,x = seq(1,4)
+   ,y = rep(y_center, 4)
+   ,label = goal_names_format
+   ,angle = 90
+   ,size = 10
+   ,color = 'gray60'
+   ,alpha = .8
+  ) +
   geom_boxplot(
-    outlier.size = 0) +
+    outlier.size = 0
+   ,alpha = 0.6
+  ) +
   #coord_flip() + 
   geom_jitter(
     position = position_jitter(width = .15)
    ,color = 'gray85'
-   ,alpha = 0.9
+   ,alpha = 0.6
   ) + 
   stat_summary(
    aes(
@@ -89,7 +126,7 @@ strand_boxes <- function (df) {
    )
   ,fun.y = mean
   ,geom = 'text'
-  ,size = 8
+  ,size = 7
   ) +
   labs(
     x = 'Goal Name'
@@ -100,8 +137,19 @@ strand_boxes <- function (df) {
    ,plot.background = element_blank()
    ,panel.grid.major = element_blank()
    ,panel.grid.minor = element_blank()
-   ,axis.text.x = element_text(size = rel(0.7))
+   #,axis.text.x = element_text(size = rel(0.7))
+   ,axis.title.y = element_blank()
+   ,axis.text.x = element_blank()
+   ,panel.margin = unit(0,"null")
+   ,plot.margin = rep(unit(0,"null"),4)
+   ,axis.ticks.margin = unit(0,"null")
   )
   
   return(p)
 }
+
+p <- strand_boxes(df=m6)
+p + guides(fill = FALSE) 
+
+#theme(axis.text.y = element_text(size = rel(1.5)))
+library(stringr)

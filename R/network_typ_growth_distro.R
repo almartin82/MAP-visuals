@@ -55,6 +55,10 @@ network_typ_growth_distro <- function (
   
   nat_plus$Perc_Growth <- as.numeric(nat_plus$Perc_Growth) * 100
   
+  #how do I avoid doing this awful global assignment
+  kipp_rank <<- sum(comparison_pct_typ_growth * 100 <= nat_plus$Perc_Growth)
+  kipp_denom <<- length(nat_plus$Perc_Growth)
+  
   p <- ggplot(
     data = nat_plus
    ,aes(
@@ -72,7 +76,7 @@ network_typ_growth_distro <- function (
    ,hjust = 0
    ,vjust = 0.3
    #,angle = 90
-   ,size= 3
+   ,size= 1
    ,color='floralwhite'
   ) + 
   coord_flip() +  
@@ -107,7 +111,35 @@ network_typ_growth_distro <- function (
   ) +
   scale_fill_manual(
     values = c('gray30', 'gold1')
-  ) 
+  ) + 
+  annotate(
+    geom = 'text'
+   ,x = 1
+   #,y = .85 * nat_plus[nat_plus$dummy_x == 1,'Perc_Growth']
+   ,y = .85 *nat_plus[nat_plus$dummy_x == max(nat_plus$dummy_x),'Perc_Growth']
+   ,label = paste(kipp_rank, ordinal_me(kipp_rank), ' of ', kipp_denom, sep = '')
+   ,color = 'gray20'
+   ,alpha = .8
+   ,size = 9
+   ,vjust = 1
+   ,angle = 0
+  )
+
 
   return(p)
 }
+
+#test
+network_typ_growth_distro(
+  nat_results_df=kipp_results
+ ,measurementscale='Mathematics'
+ ,academic_year=2012
+ ,grade_level=6
+ ,start_season='SPRING'
+ ,end_season='SPRING'
+ ,comparison_name='Imaginary Prep'
+ ,comparison_pct_typ_growth=.70
+ ,replace_nat_results_match=TRUE
+ ,de_schoolify_names = TRUE
+)
+
