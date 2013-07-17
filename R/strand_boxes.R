@@ -102,8 +102,8 @@ strand_boxes <- function (df) {
   ) + 
   annotate(
     "text"
-   ,x = seq(1,4)
-   ,y = rep(y_center, 4)
+   ,x = seq(1,length(goal_names_format))
+   ,y = rep(y_center, length(goal_names_format))
    ,label = goal_names_format
    ,angle = 90
    ,size = 10
