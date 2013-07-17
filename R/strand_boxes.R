@@ -106,19 +106,19 @@ strand_boxes <- function (df) {
    ,y = rep(y_center, length(goal_names_format))
    ,label = goal_names_format
    ,angle = 90
-   ,size = 10
-   ,color = 'gray60'
-   ,alpha = .8
+   ,size = 8
+   ,color = 'gray80'
+   ,alpha = .9
   ) +
   geom_boxplot(
-    outlier.size = 0
-   ,alpha = 0.6
+    alpha = 0.6
   ) +
   #coord_flip() + 
   geom_jitter(
     position = position_jitter(width = .15)
    ,color = 'gray85'
    ,alpha = 0.6
+   ,shape = 1
   ) + 
   stat_summary(
    aes(

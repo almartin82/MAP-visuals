@@ -56,7 +56,8 @@ network_typ_growth_distro <- function (
   nat_plus$Perc_Growth <- as.numeric(nat_plus$Perc_Growth) * 100
   
   #how do I avoid doing this awful global assignment
-  kipp_rank <<- sum(comparison_pct_typ_growth * 100 <= nat_plus$Perc_Growth)
+    #-1 because it is getting compared to itself
+  kipp_rank <<- sum(comparison_pct_typ_growth * 100 <= nat_plus$Perc_Growth) - 1
   kipp_denom <<- length(nat_plus$Perc_Growth)
   
   p <- ggplot(
@@ -116,7 +117,7 @@ network_typ_growth_distro <- function (
     geom = 'text'
    ,x = 1
    #,y = .85 * nat_plus[nat_plus$dummy_x == 1,'Perc_Growth']
-   ,y = .85 *nat_plus[nat_plus$dummy_x == max(nat_plus$dummy_x),'Perc_Growth']
+   ,y = .7 *nat_plus[nat_plus$dummy_x == max(nat_plus$dummy_x),'Perc_Growth']
    ,label = paste(kipp_rank, ordinal_me(kipp_rank), ' of ', kipp_denom, sep = '')
    ,color = 'gray20'
    ,alpha = .8
