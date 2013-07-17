@@ -50,18 +50,18 @@ strand_boxes <- function (df) {
      ,value.name = names(stage_1a)[8:15]
   )
   
-  head(stage_2a)
-  head(stage_2b)
+  #head(stage_2a)
+  #head(stage_2b)
   
   #these should be the same length
-  nrow(stage_2a)
-  nrow(stage_2b)  
+  #nrow(stage_2a)
+  #nrow(stage_2b)  
   
   #cbind them together
   stage_3 <- stage_2a
   stage_3$GOAL_NAME <- stage_2b$value
   
-  head(stage_3)
+  #head(stage_3)
   
   #drop NA goals
   stage_4 <- stage_3[!is.na(stage_3$GOAL_NAME),]
@@ -77,11 +77,11 @@ strand_boxes <- function (df) {
   ) + 
   geom_boxplot(
     outlier.size = 0) +
-  coord_flip() + 
+  #coord_flip() + 
   geom_jitter(
     position = position_jitter(width = .15)
-   ,color = 'gray60'
-   ,alpha = 0.8
+   ,color = 'gray85'
+   ,alpha = 0.9
   ) + 
   stat_summary(
    aes(
@@ -100,6 +100,7 @@ strand_boxes <- function (df) {
    ,plot.background = element_blank()
    ,panel.grid.major = element_blank()
    ,panel.grid.minor = element_blank()
+   ,axis.text.x = element_text(size = rel(0.7))
   )
   
   return(p)
