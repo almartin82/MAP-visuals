@@ -124,22 +124,5 @@ network_typ_growth_distro <- function (
    ,vjust = 1
    ,angle = 0
   )
-
-
   return(p)
 }
-
-#test
-network_typ_growth_distro(
-  nat_results_df=kipp_results
- ,measurementscale='Mathematics'
- ,academic_year=2012
- ,grade_level=6
- ,start_season='SPRING'
- ,end_season='SPRING'
- ,comparison_name='Imaginary Prep'
- ,comparison_pct_typ_growth=.70
- ,replace_nat_results_match=TRUE
- ,de_schoolify_names = TRUE
-)
-
