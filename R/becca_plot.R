@@ -1,6 +1,9 @@
 becca_plot <- function(
    df
   ,first_and_spring_only = TRUE
+  ,justify_widths = FALSE
+  ,justify_min = NA
+  ,justify_max = NA
   ,entry_grades = c(-0.7, 4.3)
   ,color_scheme = 'KIPP Report Card'
   ,facets = FALSE
@@ -118,7 +121,12 @@ becca_plot <- function(
   
   #FORMAT X AXIS LABELS
   becca_x_breaks <- sort(unique(final_df$GRADE_LEVEL_SEASON))
-  becca_x_labels <- unlist(lapply(becca_x_breaks, fall_spring_me))  
+  becca_x_labels <- unlist(lapply(becca_x_breaks, fall_spring_me))
+  
+  if (justify_widths == TRUE) {
+    becca_x_breaks <- c(justify_min, becca_x_breaks, justify_max)
+    becca_x_labels <- c('', becca_x_labels, '')
+  }
   
   #PLOT PLOT PLOT PLOT
   p <- ggplot() +
@@ -196,9 +204,13 @@ becca_plot <- function(
     #format text
     theme(
      #,axis.title = element_text(size = rel(1.75))
-    ) + scale_x_continuous(
+    ) + 
+    scale_x_continuous(
       breaks = becca_x_breaks
      ,labels = becca_x_labels
+    ) +
+    coord_cartesian(
+      xlim=c(min(becca_x_breaks),max(becca_x_breaks))  
     )
 
   
