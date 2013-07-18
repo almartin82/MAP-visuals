@@ -35,11 +35,25 @@ network_typ_growth_distro <- function (
     nat$School_Display_Name <- gsub(' Academy of', '', nat$School_Display_Name)
     nat$School_Display_Name <- gsub(' Academy', '', nat$School_Display_Name)
     nat$School_Display_Name <- gsub(' Middle School', '', nat$School_Display_Name)
+    nat$School_Display_Name <- gsub(' Elementary', '', nat$School_Display_Name)
+    nat$School_Display_Name <- gsub(' Primary', '', nat$School_Display_Name)
     nat$School_Display_Name <- gsub(' College Preparatory', '', nat$School_Display_Name)
     nat$School_Display_Name <- gsub(' College Prep', '', nat$School_Display_Name)
     nat$School_Display_Name <- gsub(' Charter School', '', nat$School_Display_Name)
     nat$School_Display_Name <- gsub(' School', '', nat$School_Display_Name)
     nat$School_Display_Name <- gsub(' Preparatory', ' Prep', nat$School_Display_Name)
+  }
+  
+  #target beat how many schools?
+    #n.b <- how do I avoid doing this awful global assignment
+  kipp_rank <<- sum(comparison_pct_typ_growth < as.numeric(nat$Perc_Growth)) + 1
+  kipp_denom <<- length(nat$Perc_Growth) + 1
+  
+  #text size
+  hacky_text_size <<- 6 + -.12 * kipp_denom
+  
+  if(hacky_text_size < 1) {
+    hacky_text_size <<- 1
   }
   
   #add a row for comparison school
@@ -55,10 +69,7 @@ network_typ_growth_distro <- function (
   
   nat_plus$Perc_Growth <- as.numeric(nat_plus$Perc_Growth) * 100
   
-  #how do I avoid doing this awful global assignment
-    #-1 because it is getting compared to itself
-  kipp_rank <<- sum(comparison_pct_typ_growth * 100 <= nat_plus$Perc_Growth) - 1
-  kipp_denom <<- length(nat_plus$Perc_Growth)
+  
   
   p <- ggplot(
     data = nat_plus
@@ -77,7 +88,7 @@ network_typ_growth_distro <- function (
    ,hjust = 0
    ,vjust = 0.3
    #,angle = 90
-   ,size= 1
+   ,size= hacky_text_size
    ,color='floralwhite'
   ) + 
   coord_flip() +  
@@ -88,9 +99,6 @@ network_typ_growth_distro <- function (
     y = 'Percent Making Typical [Keep Up] Growth'
    ,title = 'KIPP Network Comparison'
   ) +
-  scale_x_continuous(
-    limits = c(0, max(nat_plus$dummy_x))
-  ) +
   theme(
     #zero out cetain formatting
     panel.background = element_blank()
@@ -98,14 +106,14 @@ network_typ_growth_distro <- function (
     
     #grid
    ,panel.grid.major = element_blank()
+   ,panel.grid.minor = element_blank()
     #title and axis sizes
    ,title = element_text(size = rel(0.7))
 
    ,axis.title.y = element_blank()
    ,axis.text.y = element_blank()
    ,axis.ticks.y = element_blank()
-    
-   #,axis.title.y = element_text(size = rel(0.7))   
+     
    ,panel.margin = unit(0,"null")
    ,plot.margin = rep(unit(0,"null"),4)
    ,axis.ticks.margin = unit(0,"null")
