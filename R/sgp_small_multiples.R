@@ -54,6 +54,7 @@ sgp_small_multiples <- function (
        ,yend = RIT_CHANGE
        ,label = GROWTH_PERCENTILE
        ,group = STUDENT_NAME
+       ,color = SGP_BIN
       )
   ) +
     #start TERM
@@ -64,6 +65,7 @@ sgp_small_multiples <- function (
        ,label = START_TERM_VERIF
       )
      ,size = rel(2.75)
+     ,color = 'gray20'
      ,alpha = .3
      #annotate down and to the right of start RIT
      ,vjust = 1
@@ -71,6 +73,7 @@ sgp_small_multiples <- function (
     ) + 
     geom_segment(
       size = rel(1)
+     ,color = 'gray20'
      ,alpha = .6
     ) + 
     #end TERM
@@ -81,6 +84,7 @@ sgp_small_multiples <- function (
        ,label = END_TERM_VERIF
       )
      ,size = rel(2.75)
+     ,color = 'gray20'
      ,alpha = .3
      #annotate down and to the left of start RIT
      ,vjust = 1
@@ -104,6 +108,7 @@ sgp_small_multiples <- function (
        ,y = 0
        ,label = START_RIT
       )
+     ,color = 'gray20'
      ,size = rel(4)
      #annotate up and to the right of start RIT
      ,vjust = 0
@@ -118,6 +123,7 @@ sgp_small_multiples <- function (
        ,y = RIT_CHANGE
        ,label = END_RIT
       )
+     ,color = 'gray20'
      ,size = rel(4)
      #annotate down and to the left of end RIT
      ,vjust = 0
@@ -127,11 +133,11 @@ sgp_small_multiples <- function (
     ylim(
       growth_min, growth_max
     ) +
+    scale_color_manual(
+      values = c('orange', 'lightgreen', 'firebrick1')
+    ) +
     scale_x_continuous(
       c(-.05, 1.05)
-    ) +
-    scale_fill_discrete(
-      
     ) +
     labs(
       color = "Student Growth Percentile"
