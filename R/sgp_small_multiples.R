@@ -20,7 +20,7 @@ sgp_small_multiples <- function (
   df[mask]$GRADE_START_TRANSFORM <- 0.3
   
   #limit decimals
-  df$GROWTH_PERCENTILE <- round_any(df$GROWTH_PERCENTILE, .1, f = floor)
+  df$GROWTH_PERCENTILE <- trunc(df$GROWTH_PERCENTILE, 1)
   
   #get ymin and ymax
   growth_min <<- round_any(
