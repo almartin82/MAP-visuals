@@ -18,8 +18,7 @@ network_typ_growth_distro <- function (
                   & nat_results_df$Growth_Academic_Year == academic_year
                   & nat_results_df$Growth_Grade_Level == grade_level
                   & nat_results_df$Start_Season == start_season
-                  & nat_results_df$End_Season == end_season, ]
-  
+                  & nat_results_df$End_Season == end_season, ]  
 
   #strip KIPP from name?
   if (de_kippify_names == TRUE) {
@@ -42,6 +41,11 @@ network_typ_growth_distro <- function (
     nat$School_Display_Name <- gsub(' Charter School', '', nat$School_Display_Name)
     nat$School_Display_Name <- gsub(' School', '', nat$School_Display_Name)
     nat$School_Display_Name <- gsub(' Preparatory', ' Prep', nat$School_Display_Name)
+  }
+  
+  #name collision
+  if (replace_nat_results_match == TRUE) {
+    nat <- nat[nat$School_Display_Name != comparison_name,]
   }
   
   #target beat how many schools?
