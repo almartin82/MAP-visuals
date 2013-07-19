@@ -11,4 +11,5 @@ Depends:
     ggplot2,
     data.table,
     grid,
-    plyr
+    plyr,
+    reshape
