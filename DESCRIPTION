@@ -13,4 +13,4 @@ Depends:
     grid,
     plyr,
     reshape,
-    gridextra
+    gridExtra
