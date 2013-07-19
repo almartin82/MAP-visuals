@@ -66,7 +66,7 @@ strand_boxes <- function (df) {
   #drop NA goals
   stage_4 <- stage_3[!is.na(stage_3$GOAL_NAME),]
   #head(stage_4)
-  y_center <<- min(stage_4$value) + 0.5 * (max(stage_4$value) - min(stage_4$value)) 
+  y_center <<- min(stage_4$value, na.rm = TRUE) + 0.5 * (max(stage_4$value, na.rm = TRUE) - min(stage_4$value, na.rm = TRUE)) 
   goal_names <- attributes(factor(stage_4$GOAL_NAME))$levels
   
   more_30 <- nchar(goal_names) > 30
