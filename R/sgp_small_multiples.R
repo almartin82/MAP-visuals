@@ -130,8 +130,8 @@ sgp_small_multiples <- function (
      ,hjust = 1
     ) + 
     #axis stuff
-    ylim(
-      growth_min, growth_max
+    scale_y_continuous(
+      c(growth_min, growth_max)
     ) +
     scale_color_manual(
       values = c('orange', 'lightgreen', 'firebrick1')
