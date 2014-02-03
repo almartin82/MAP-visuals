@@ -123,25 +123,25 @@ becca_plot <- function(
                                PCT, 
                                AT_GRADE_LEVEL_DUMMY, 
                                ORDER,
+                               QUARTILE,
                                MIDPOINT=cumsum(PCT) - 0.5*PCT),
                          by=list(SCH_ABBREV, 
                                  COHORT, 
                                  MAP_YEAR_ACADEMIC, 
                                  GRADE_LEVEL_SEASON, 
-                                 MEASUREMENTSCALE, 
-                                 QUARTILE)]
+                                 MEASUREMENTSCALE)]
   #...and another for those below.
   npr_below <- npr_below[,list(N, 
                                PCT, 
                                AT_GRADE_LEVEL_DUMMY, 
                                ORDER,
+                               QUARTILE,
                                MIDPOINT=cumsum(PCT) - 0.5*PCT),
                          by=list(SCH_ABBREV, 
                                  COHORT, 
                                  MAP_YEAR_ACADEMIC, 
                                  GRADE_LEVEL_SEASON, 
-                                 MEASUREMENTSCALE, 
-                                 QUARTILE)]
+                                 MEASUREMENTSCALE)]
   
   npr_below[,QUARTILE:=ordered(QUARTILE, levels = names(sort(-table(QUARTILE))))]
   
