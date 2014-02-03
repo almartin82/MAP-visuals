@@ -9,8 +9,9 @@ Description: Functions that support analysis of NWEA MAP assessment data
 License: Creative Commons Attribution-NonCommercial-NoDerivs
 Depends:
     ggplot2,
-    data.table,
     grid,
     plyr,
     reshape,
     gridExtra
+Imports:
+    data.table
