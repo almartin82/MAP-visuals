@@ -20,11 +20,12 @@ becca_plot <- function(
   # Changed passed dataframes' column names to those used throughout 
   # function
   
-  colnames(.data)[colnames(.data) == school_name_column] <- 'SCH_ABBR'
+  colnames(.data)[colnames(.data) == school_name_column] <- 'SCH_ABBREV'
   colnames(.data)[colnames(.data) == cohort_name_column] <- 'COHORT'
   colnames(.data)[colnames(.data) == academic_year_column] <- 'MAP_YEAR_ACADEMIC'
   colnames(.data)[colnames(.data) == grade_level_season_column] <- 'GRADE_LEVEL_SEASON'
-  colnames(.data)[colnames(.data) == measurement_scale_column] <- 'PERCENTILE_2011_NORMS'
+  colnames(.data)[colnames(.data) == measurement_scale_column] <- 'MEASUREMENTSCALE'
+  colnames(.data)[colnames(.data) == percentile_column] <- 'PERCENTILE_2011_NORMS'
  
   
   #TRANSFORMATION 1 - TRIM

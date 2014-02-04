@@ -14,7 +14,7 @@ fall_spring_me <- function(grade_level) {
   } else if(round(grade_level %% 1,1) == 0.3) {
     return(paste(round(grade_level, 0) + 1, 'F', sep = ''))
   } else if(round(grade_level %% 1,2) == 0.65) {
-    return(paste(round(grade_level, 0) + 1, 'W', sep = ''))
+    return(paste(round(grade_level, 0), 'W', sep = ''))
   } else {
     return(NA)
   }
