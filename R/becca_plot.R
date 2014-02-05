@@ -1,5 +1,11 @@
 becca_plot <- function(
-   df
+   .data
+  ,school_name_column = 'SCH_ABBR'
+  ,cohort_name_column = 'COHORT'
+  ,academic_year_column = 'MAP_YEAR_ACADEMIC'
+  ,grade_level_season_column = 'GRADE_LEVEL_SEASON'
+  ,measurement_scale_column = 'MEASUREMENTSCALE'
+  ,percentile_column = 'PERCENTILE_2011_NORMS'
   ,first_and_spring_only = TRUE
   ,justify_widths = FALSE
   ,justify_min = NA
@@ -10,15 +16,28 @@ becca_plot <- function(
   ,facet_opts = FALSE
   ,title_text = FALSE) {
   
+  
+  # Changed passed dataframes' column names to those used throughout 
+  # function
+  
+  colnames(.data)[colnames(.data) == school_name_column] <- 'SCH_ABBREV'
+  colnames(.data)[colnames(.data) == cohort_name_column] <- 'COHORT'
+  colnames(.data)[colnames(.data) == academic_year_column] <- 'MAP_YEAR_ACADEMIC'
+  colnames(.data)[colnames(.data) == grade_level_season_column] <- 'GRADE_LEVEL_SEASON'
+  colnames(.data)[colnames(.data) == measurement_scale_column] <- 'MEASUREMENTSCALE'
+  colnames(.data)[colnames(.data) == percentile_column] <- 'PERCENTILE_2011_NORMS'
+ 
+  
   #TRANSFORMATION 1 - TRIM
-  #trim down the CDF - we don't need all the columns
-  stage_1 <- df[,c(
+  #trim down the C.data - we don't need all the columns
+  require(data.table)
+  d1 <- as.data.table(as.data.frame(.data[,c(
      'SCH_ABBREV'
     ,'COHORT'
     ,'MAP_YEAR_ACADEMIC'
     ,'GRADE_LEVEL_SEASON'
     ,'MEASUREMENTSCALE'
-    ,'PERCENTILE_2011_NORMS')]
+    ,'PERCENTILE_2011_NORMS')]))
     
   #all terms or first & spring only?
   if (first_and_spring_only) {
@@ -26,101 +45,110 @@ becca_plot <- function(
     #default is Fall K, Fall 5 (aka -0.7, 4.3) - only change if you need to 
     #add an additional entry grade (perhaps 9th?) or to take away 5th
     #(eg for a fully grown KIPP school?)
-    stage_1 <- stage_1[stage_1$GRADE_LEVEL_SEASON %in% entry_grades |
-                       stage_1$GRADE_LEVEL_SEASON %% 1 == 0,]
+    d1 <- d1[GRADE_LEVEL_SEASON %in% entry_grades | GRADE_LEVEL_SEASON %% 1 == 0]
   }
   
-  #tag each observation w/ appropriate quartile
-  stage_1$QUARTILE <- floor((stage_1$PERCENTILE_2011_NORMS/25) + 1)
   
-  #just the number 1, so that we can SUM up the rows when we ddply them up
-  #there must be a better way than this... right?
-  stage_1$DUMMY <- 1
-
+  
+  #calculate quartile from test percentile
+  d1[,QUARTILE:=floor((PERCENTILE_2011_NORMS/25) + 1)]
+  
   #TRANSFORMATION 2 - COUNT
-    #calculate group level averages.  Our final data set should have
+  #calculate group level averages.  Our final data set should have
   
-    #SCHOOL    COHORT    YEAR    SUBJECT     QUARTILE      PCT
+  #SCHOOL    COHORT    YEAR    SUBJECT     QUARTILE      PCT
   
-    #There is definitely a more elegant way to do this that doesn't
-    #require 2 ddply calls, but this works for now
+  #There is definitely a more elegant way to do this that doesn't
+  #require 2 ddply calls, but this works for now
   
-  #ddply into counts by quartile
-  stage_2 <- ddply(
-    stage_1
-   ,.(SCH_ABBREV, COHORT, MAP_YEAR_ACADEMIC, GRADE_LEVEL_SEASON
-     ,MEASUREMENTSCALE, QUARTILE)
-   ,summarise
-   ,n = sum(DUMMY)
-  )
-
-  #TRANSFORMATION 3 - PERCENTAGES
-  #use ddply to calculate percentages by quartile
-  stage_3 <- ddply(
-    stage_2
-   ,.(SCH_ABBREV, COHORT, MAP_YEAR_ACADEMIC, GRADE_LEVEL_SEASON
-     ,MEASUREMENTSCALE)
-   ,summarise
-   ,QUARTILE = QUARTILE
-   ,PCT = round((n / sum(n)) * 100, 1)
-  )
+  d2<-d1[,list(N_Qrtl=.N), 
+         keyby=list(SCH_ABBREV, 
+                    COHORT,
+                    MAP_YEAR_ACADEMIC, 
+                    GRADE_LEVEL_SEASON, 
+                    MEASUREMENTSCALE, 
+                    QUARTILE)][
+                      d1[,list(.N), 
+                         keyby=list(SCH_ABBREV, 
+                                    COHORT,
+                                    MAP_YEAR_ACADEMIC, 
+                                    GRADE_LEVEL_SEASON, 
+                                    MEASUREMENTSCALE)]][,PCT:=round(N_Qrtl/N*100,1)]
 
   #add a column that indicates above/below grade level
   #this simplifies bar chart creation
-  #preallocate column
-  stage_3$AT_GRADE_LEVEL_DUMMY <- ''
   #set flags for above and below
-  stage_3[stage_3$QUARTILE <= 2 , 'AT_GRADE_LEVEL_DUMMY'] <- 'NO'
-  stage_3[stage_3$QUARTILE >= 3 , 'AT_GRADE_LEVEL_DUMMY'] <- 'YES'
+  d2[QUARTILE<=2, AT_GRADE_LEVEL_DUMMY:='NO']
+  d2[QUARTILE>=3, AT_GRADE_LEVEL_DUMMY:='YES']
+
   
   #TRANSFORMATION 4 - CUSTOM ORDERING
   #this was tricky (and important!) -- thanks Mike H.
-  stage_3$ORDER <- stage_3$QUARTILE
+  d2[,ORDER:=QUARTILE]
+  
+  #stage_3$ORDER <- stage_3$QUARTILE
   #2 becomes placeholder
-  stage_3[stage_3$QUARTILE == 2, 'ORDER'] <- 'placeholder'
+  
+  d2[QUARTILE==2, ORDER:=99]
+  
+  #stage_3[stage_3$QUARTILE == 2, 'ORDER'] <- 'placeholder'
   #1 becomes 2
-  stage_3[stage_3$QUARTILE == 1, 'ORDER'] <- 2
+  d2[QUARTILE==1, ORDER:=2]
+  
+  #stage_3[stage_3$QUARTILE == 1, 'ORDER'] <- 2
   #placeholder becomes 1
-  stage_3[stage_3$ORDER == 'placeholder', 'ORDER'] <- 1
+  d2[ORDER==99,ORDER:=1]
+  
+  #stage_3[stage_3$ORDER == 'placeholder', 'ORDER'] <- 1
   #finally sort by new order (so midpoint calculation works properly)
-  final_df <- stage_3[with(stage_3, order(MEASUREMENTSCALE, SCH_ABBREV, COHORT,
-                                         MAP_YEAR_ACADEMIC, GRADE_LEVEL_SEASON,
-                                         ORDER)), ] 
+  final_data <- copy(d2[order(MEASUREMENTSCALE, 
+                         SCH_ABBREV, 
+                         COHORT,
+                         MAP_YEAR_ACADEMIC, 
+                         GRADE_LEVEL_SEASON,
+                         ORDER)]) 
 
-  #TRANSFORMATION 5 - TWO DFs FOR CHART
+  #TRANSFORMATION 5 - TWO .datas FOR CHART
   #super helpful advice from: http://stackoverflow.com/questions/13734368/ggplot2-and-a-stacked-bar-chart-with-negative-values
   #above
-  npr_above <- subset(final_df, AT_GRADE_LEVEL_DUMMY == 'YES')
+  npr_above <- final_data[AT_GRADE_LEVEL_DUMMY == 'YES']
   #below
-  npr_below <- subset(final_df, AT_GRADE_LEVEL_DUMMY == 'NO')
+  npr_below <- final_data[AT_GRADE_LEVEL_DUMMY == 'NO']
   #flip the sign
-  npr_below$PCT <- npr_below$PCT * -1
+  npr_below[, PCT:= PCT * -1]
 
   #TRANSFORMATION 5 - CALCULATE MIDPOINTS (for chart labels)
   #one df for the two quartiles above the national average...
     
-  npr_above = ddply(
-    npr_above
-   ,.(SCH_ABBREV, COHORT, MAP_YEAR_ACADEMIC, GRADE_LEVEL_SEASON, MEASUREMENTSCALE)
-   ,transform
-   ,MIDPOINT = cumsum(PCT) - 0.5*PCT
-  )
+  npr_above <- npr_above[,list(N, 
+                               PCT, 
+                               AT_GRADE_LEVEL_DUMMY, 
+                               ORDER,
+                               QUARTILE,
+                               MIDPOINT=cumsum(PCT) - 0.5*PCT),
+                         by=list(SCH_ABBREV, 
+                                 COHORT, 
+                                 MAP_YEAR_ACADEMIC, 
+                                 GRADE_LEVEL_SEASON, 
+                                 MEASUREMENTSCALE)]
   #...and another for those below.
-  npr_below = ddply(
-    npr_below
-   ,.(SCH_ABBREV, COHORT, MAP_YEAR_ACADEMIC, GRADE_LEVEL_SEASON, MEASUREMENTSCALE)
-   ,transform
-   #,MIDPOINT = sum(ifelse(ORDER %in% c(1,2), PCT, 0))
-   ,MIDPOINT = cumsum(PCT) - 0.5*PCT
-  )
+  npr_below <- npr_below[,list(N, 
+                               PCT, 
+                               AT_GRADE_LEVEL_DUMMY, 
+                               ORDER,
+                               QUARTILE,
+                               MIDPOINT=cumsum(PCT) - 0.5*PCT),
+                         by=list(SCH_ABBREV, 
+                                 COHORT, 
+                                 MAP_YEAR_ACADEMIC, 
+                                 GRADE_LEVEL_SEASON, 
+                                 MEASUREMENTSCALE)]
   
-  npr_below <- transform(
-    npr_below
-   ,QUARTILE = ordered(QUARTILE, levels = names(sort(-table(QUARTILE))))
-  )
+  npr_below[,QUARTILE:=ordered(QUARTILE, levels = names(sort(-table(QUARTILE))))]
+  
   
   #FORMAT X AXIS LABELS
-  becca_x_breaks <- sort(unique(final_df$GRADE_LEVEL_SEASON))
+  becca_x_breaks <- sort(unique(final_data$GRADE_LEVEL_SEASON))
   becca_x_labels <- unlist(lapply(becca_x_breaks, fall_spring_me))
   
   if (justify_widths == TRUE) {
@@ -274,6 +302,6 @@ becca_plot <- function(
   )
   
   return(
-    list(p, final_df)
+    list(p, final_data)
   )
 }
