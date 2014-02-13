@@ -1,5 +1,6 @@
 export(abbrev)
 export(haid_plot)
+export(norm_sim)
 import(assertthat)
 import(data.table)
 import(ggplot2)
