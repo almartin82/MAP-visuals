@@ -32,7 +32,7 @@ norm_sim(start.grade = 5, end.grade = 8, start.subject = "Mathematics",
 }
 \value{
 a data frame with \code{n.sample + (n.sample x grades x
-length(yearly.cycle)} rows)}.
+length(yearly.cycle)} rows).
 }
 \description{
 \code{norm_sim} simulates \code{n.samples} student growth

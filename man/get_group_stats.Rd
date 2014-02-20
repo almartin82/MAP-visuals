@@ -1,0 +1,28 @@
+\name{get_group_stats}
+\alias{get_group_stats}
+\title{Calculate quartiles stats for \code{haid_plot}}
+\usage{
+get_group_stats(df, grp, RIT, dummy_y)
+}
+\arguments{
+  \item{df}{a data frames with individual RIT scores and
+  grouping variable}
+
+  \item{grp}{the variable to group by}
+
+  \item{RIT}{the column in the data frame with RIT scores}
+
+  \item{dummy_y}{column used to establish data placement on
+  \code{haid_plot}}
+}
+\value{
+A data frame with aggregate values grouped by grp for count
+of students, y-axis placement, group average RIT, percent
+of students in group (relative to total students), and the
+total count of students.
+}
+\description{
+\code{get_group_stats} calculates counts and percentages
+used in \code{haid_plot}
+}
+
