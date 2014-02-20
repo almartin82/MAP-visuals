@@ -31,7 +31,7 @@
 #' @param n.samples the number of samples
 #' 
 #' @return a data frame with \code{n.sample + (n.sample x grades x 
-#' length(yearly.cycle)} rows)}.
+#' length(yearly.cycle)} rows).
 #' 
 #' @export
 #' 

@@ -202,6 +202,7 @@ haid_plot <- function(
       ,size = pointsize - 0.5
       ,shape = '|'
       ,color = '#CFCCC1'
+      ,alpha=p_alpha
     ) + 
     geom_point(
       aes(
@@ -210,6 +211,7 @@ haid_plot <- function(
       ,size = pointsize - 0.5
       ,shape = '|'
       ,color = '#FEBC11'
+      ,alpha=p_alpha
     )  
   
   #typical and college ready goal labels
@@ -222,7 +224,8 @@ haid_plot <- function(
       ,color = "#CFCCC1"
       ,size = pointsize - 0.5 
       ,hjust = 0.5
-      ,vjust = 0.5
+      ,vjust = 0
+      ,alpha=p_alpha
     ) + 
     geom_text(
       aes(
@@ -232,7 +235,8 @@ haid_plot <- function(
       ,color = "#FEBC11"
       ,size = pointsize - 0.5 
       ,hjust = 0.5
-      ,vjust = 0.5
+      ,vjust = 0
+      ,alpha=p_alpha
     )  
   #add segments
   p <- p +
