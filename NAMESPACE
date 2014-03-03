@@ -1,4 +1,5 @@
 export(abbrev)
+export(becca_plot)
 export(haid_plot)
 export(norm_sim)
 import(assertthat)

@@ -1,3 +1,34 @@
+#' @title Becca Vichniac's Quartile (Floating Bar) Chart 
+#'
+#' @description
+#' \code{becca_plot} returns a ggplot object binned quaritle performonce
+#'
+#' @details 
+#' This function builds and prints a bar graph with 4 bins per bar show MAP data
+#' binned by quartile (National Percentil Rank).  Bars are centered at 50th percentile 
+#' horizonatally
+#' 
+#' @param .data the data frame in TEAM canoncical style (long data forms)
+#' @param school_name_column column in \code{.data} with school names
+#' @param cohort_name_column  column in \code{.data} with cohornt names
+#' @param academic_year_column column in \code{.data} with academic years
+#' @param grade_level_season_column column in \code{.data} with numeric indicating grade season (e.g., Fall 4th
+#' = 3.3, Winter 4th = 3.7, Spring 4th = 4.0).
+#' @param measurement_scale_column column in \code{.data} with subject
+#' @param percentile_column = column in \code{.data} with NPR.
+#' @param first_and_spring_only indicator for showing shoing Fall-to-Spring rather than Spring-to-Spring
+#' @param justify_widths width justification indicator
+#' @param justify_min 
+#' @param justify_max 
+#' @param entry_grades = c(-0.7, 4.3)  GradeSeasons that should use Fall and Spring (i.e., Kinder =-.3 and %th = 4.3)
+#' @param color_scheme only 'KIPP Report Card'
+#' @param facets = FALSE
+#' @param facet_opts = FALSE
+#' @param title_text = FALSE
+#' 
+#' @return prints a ggplot object
+#' @export
+
 becca_plot <- function(
    .data
   ,school_name_column = 'SCH_ABBR'
