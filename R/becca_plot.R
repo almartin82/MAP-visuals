@@ -31,12 +31,12 @@
 
 becca_plot <- function(
    .data
-  ,school_name_column = 'SCH_ABBR'
-  ,cohort_name_column = 'COHORT'
-  ,academic_year_column = 'MAP_YEAR_ACADEMIC'
-  ,grade_level_season_column = 'GRADE_LEVEL_SEASON'
-  ,measurement_scale_column = 'MEASUREMENTSCALE'
-  ,percentile_column = 'PERCENTILE_2011_NORMS'
+  ,school_name_column = 'sch_abbr'
+  ,cohort_name_column = 'cohort'
+  ,academic_year_column = 'map_year_academic'
+  ,grade_level_season_column = 'grade_level_season'
+  ,measurement_scale_column = 'measurementscale'
+  ,percentile_column = 'percentile_2011_norms'
   ,first_and_spring_only = TRUE
   ,auto_justify_x = TRUE
   ,justify_widths = FALSE
@@ -48,7 +48,6 @@ becca_plot <- function(
   ,facet_opts = FALSE
   ,title_text = FALSE) {
   
-  
   # Changed passed dataframes' column names to those used throughout 
   # function
   
@@ -59,7 +58,6 @@ becca_plot <- function(
   colnames(.data)[colnames(.data) == measurement_scale_column] <- 'MEASUREMENTSCALE'
   colnames(.data)[colnames(.data) == percentile_column] <- 'PERCENTILE_2011_NORMS'
  
-  
   #TRANSFORMATION 1 - TRIM
   #trim down the C.data - we don't need all the columns
   require(data.table)
@@ -184,7 +182,7 @@ becca_plot <- function(
   becca_x_labels <- unlist(lapply(becca_x_breaks, fall_spring_me))
   
   if (auto_justify_x == TRUE) {
-    becca_x_breaks <- c(min(becca_x_breaks) - 0.5, becca_x_breaks, min(becca_x_breaks) + 0.5)
+    becca_x_breaks <- c(min(becca_x_breaks) - 0.35, becca_x_breaks, max(becca_x_breaks) + 0.35)
     becca_x_labels <- c('', becca_x_labels, '')
   }
   
@@ -272,9 +270,6 @@ becca_plot <- function(
       xlim=c(min(becca_x_breaks),max(becca_x_breaks))  
     )
 
-  cat(becca_x_breaks)
-  cat(becca_x_labels)
-  
   legend_labels = c('1st', '2nd', '3rd', '4th')
   
   #color style?
