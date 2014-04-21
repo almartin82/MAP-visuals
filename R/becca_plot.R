@@ -38,6 +38,7 @@ becca_plot <- function(
   ,measurement_scale_column = 'MEASUREMENTSCALE'
   ,percentile_column = 'PERCENTILE_2011_NORMS'
   ,first_and_spring_only = TRUE
+  ,auto_justify_x = TRUE
   ,justify_widths = FALSE
   ,justify_min = NA
   ,justify_max = NA
@@ -182,6 +183,11 @@ becca_plot <- function(
   becca_x_breaks <- sort(unique(final_data$GRADE_LEVEL_SEASON))
   becca_x_labels <- unlist(lapply(becca_x_breaks, fall_spring_me))
   
+  if (auto_justify_x == TRUE) {
+    becca_x_breaks <- c(min(becca_x_breaks) - 0.5, becca_x_breaks, min(becca_x_breaks) + 0.5)
+    becca_x_labels <- c('', becca_x_labels, '')
+  }
+  
   if (justify_widths == TRUE) {
     becca_x_breaks <- c(justify_min, becca_x_breaks, justify_max)
     becca_x_labels <- c('', becca_x_labels, '')
@@ -249,7 +255,6 @@ becca_plot <- function(
      ,plot.background = element_blank()
      ,panel.grid.major = element_blank()
      ,panel.grid.minor = element_blank()
-     #,legend.title=element_blank()
       
       #title and axis sizes
      ,title = element_text(size = rel(0.9))
@@ -257,13 +262,8 @@ becca_plot <- function(
      ,axis.text.y = element_blank()
      
      ,plot.margin = rep(unit(0,"null"),4)
-     #,legend.margin = rep(unit(0,"null"),4)
     ) +
     
-    #format text
-    theme(
-     #,axis.title = element_text(size = rel(1.75))
-    ) + 
     scale_x_continuous(
       breaks = becca_x_breaks
      ,labels = becca_x_labels
@@ -272,6 +272,8 @@ becca_plot <- function(
       xlim=c(min(becca_x_breaks),max(becca_x_breaks))  
     )
 
+  cat(becca_x_breaks)
+  cat(becca_x_labels)
   
   legend_labels = c('1st', '2nd', '3rd', '4th')
   
