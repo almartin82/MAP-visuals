@@ -253,6 +253,7 @@ becca_plot <- function(
      ,plot.background = element_blank()
      ,panel.grid.major = element_blank()
      ,panel.grid.minor = element_blank()
+     ,axis.ticks.y = element_blank()
       
       #title and axis sizes
      ,title = element_text(size = rel(0.9))
