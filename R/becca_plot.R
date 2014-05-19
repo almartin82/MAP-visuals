@@ -20,7 +20,7 @@
 #' @param justify_widths width justification indicator
 #' @param justify_min 
 #' @param justify_max 
-#' @param entry_grades = c(-0.7, 4.3)  GradeSeasons that should use Fall and Spring (i.e., Kinder =-.3 and %th = 4.3)
+#' @param entry_grades = c(-0.7, 4.3)  GradeSeasons that should use Fall and Spring (i.e., Kinder =-.3 and 5th = 4.3)
 #' @param color_scheme only 'KIPP Report Card'
 #' @param facets = FALSE
 #' @param facet_opts = FALSE

@@ -9,5 +9,6 @@
 #' @import assertthat
 #' @import data.table
 #' @import ggplot2
+#' @import dplyr
 #' 
 NULL
