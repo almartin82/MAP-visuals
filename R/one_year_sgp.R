@@ -1,3 +1,14 @@
+#' @title One Year SGO histogram
+#'
+#' @description
+#' \code{one_year_sgp} returns a ggplot histogram that shows the distribution of SGPs
+#'
+#' @param df long data frame in TEAM canonical style
+#' @param title_text desired plot title
+#' 
+#' @return returns a ggplot object
+#' @export
+
 one_year_sgp <- function (
     df
    ,title_text = FALSE  
