@@ -1,3 +1,13 @@
+#' @title Network Typical Growth Distribution
+#'
+#' @description
+#' \code{network_typ_growth_distro} shows your school relative to other KIPP schools
+#'
+#' @param nat_results_df KIPP results nationwide
+#' 
+#' @return a ggplot chart
+#' @export
+
 network_typ_growth_distro <- function (
   nat_results_df
  ,measurementscale

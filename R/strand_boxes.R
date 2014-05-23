@@ -1,3 +1,13 @@
+#' @title Strand boxes
+#'
+#' @description
+#' \code{strand_boxes} returns a ggplot boxplot of MAP strand scores
+#'
+#' @param df long data frame in TEAM canonical style
+#' 
+#' @return returns a ggplot object
+#' @export
+
 strand_boxes <- function (df) {
   
   #DATA TRANSFORMATIONS

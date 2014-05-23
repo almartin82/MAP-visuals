@@ -15,10 +15,8 @@
 #' 
 #' @return a vector of \code{length(quartile)} of KIPP Tiered Growth factors.
 #' @export
-#' @examples 
-#' tiered_growth()
 
-tiered_growth<- function(quartile, grade){
+tiered_growth <- function(quartile, grade){
  
   #
   # Args:

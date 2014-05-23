@@ -1,4 +1,13 @@
-#tranforms grade levels into labels for charts; eg 4.3 -> F5
+#' @title Fall-Spring Me
+#'
+#' @description
+#' \code{fall_spring_me} tranforms grade levels into labels for charts; eg 4.3 -> F5
+#'
+#' @param grade_level a grade level between -1 and 12
+#' 
+#' @return a string
+#' @export
+
 fall_spring_me <- function(grade_level) {
   #K is weird edge case
   if(grade_level == -0.7) {
