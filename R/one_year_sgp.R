@@ -1,4 +1,4 @@
-#' @title One Year SGO histogram
+#' @title One Year SGP histogram
 #'
 #' @description
 #' \code{one_year_sgp} returns a ggplot histogram that shows the distribution of SGPs

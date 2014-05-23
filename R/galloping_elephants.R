@@ -1,3 +1,16 @@
+#' @title RIT distribution change (affectionately titled 'Galloping Elephants')
+#'
+#' @description
+#' \code{one_year_sgp} returns ggplot density distributions that show change in RIT over time
+#'
+#' @param df long data frame in TEAM canonical style
+#' @param first_and_spring_only should fall/winter scores be shown, or only endpoint scores?
+#' @param entry_grades the entry grades that are considered 'first' for a cohort (default is KF and 5F)
+#' @param title_text desired plot title
+#' 
+#' @return returns a ggplot object
+#' @export
+
 galloping_elephants <- function (
     df
    ,first_and_spring_only = TRUE
