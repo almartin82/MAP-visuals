@@ -1,3 +1,15 @@
+#' @title SGP small multiples
+#'
+#' @description
+#' \code{sgp_small_multiples} returns a ggplot facet_grid with a box for every kid, showing 
+#' their SGP and rit change
+#'
+#' @param df long data frame in TEAM canonical style
+#' @param stu_per_row how many kids wide?
+#' 
+#' @return returns a ggplot object
+#' @export
+
 sgp_small_multiples <- function (
   df
   #to-do - make 'order by' a parameter

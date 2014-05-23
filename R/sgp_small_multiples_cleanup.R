@@ -1,3 +1,14 @@
+#' @title SGP small multiples cleanup
+#'
+#' @description
+#' \code{sgp_small_multiples_cleanup} is a helper function that makes the legend show correctly
+#' (size, show as number, etc)
+#'
+#' @param plot a ggplot created by sgp_small_multiples
+#' 
+#' @return returns a ggplot object
+#' @export
+
 sgp_small_multiples_cleanup <- function(plot) {
 
   #grob-ify it
