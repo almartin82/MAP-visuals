@@ -1,3 +1,18 @@
+#' @title Growth vs Percentile Rank scatterplot
+#'
+#' @description
+#' \code{growth_status_scatter} returns a ggplot scatterplot that shows student growth vs performance
+#'
+#' @param df long data frame in TEAM canonical style
+#' @param show_title logical; should the plot have a title?
+#' @param school 
+#' @param subject
+#' @param grade
+#' 
+#' @return returns a ggplot object
+#' @export
+
+
 growth_status_scatter <- function (
     df
    ,show_title = FALSE
