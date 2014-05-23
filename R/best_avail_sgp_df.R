@@ -1,3 +1,22 @@
+#' @title Build a composite data frame of 'best available' SGP
+#'
+#' @description
+#' \code{best_avail_sgp_df} returns a data frame with one sgp per student, using the growth period
+#' preferences provided.
+#'
+#' @details 
+#' Default growth period is Spring to Spring, default backup is Fall to Spring.  ie, pull a full
+#' year's growth for most kids; fall back to fall-to-spring for new kids (ie K)
+#' 
+#' @param df a data frame of SGPs.  TODO: define structure
+#' @param prefer_period Name of the top growth term to use.  Default is 'Spring to Spring'.
+#' @param backup_period_1 First backup.  Default is 'Fall to Spring'.
+#' @param backup_period_2 Second backup.  Default is 'Winter to Spring'.
+#' 
+#' @return a data frame of SGPs
+#' @export
+
+
 best_avail_sgp_df <- function (
   df
  ,prefer_period = 'Spring to Spring'
