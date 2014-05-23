@@ -2,13 +2,13 @@
 \docType{data}
 \name{nweamap}
 \alias{nweamap}
-\title{NWEA MAP Colllection of Comprehensive Data File}
-\format{a \code{data.frame}with 22607 obs. of  72 variables:}
+\title{NWEA MAP Colllection of Comprehensive Data Files}
+\format{a \code{data.frame} with 22607 obs. of  72 variables.}
 \usage{
 nweamap
 }
 \description{
-Mulitple years' of multiples schools' worth of NWEA data for a single
+Mulitple years' of multiples schools' worth of NWEA student assessment data for a single
 district
 }
 \author{

@@ -2,6 +2,7 @@
 
 export(abbrev)
 export(becca_plot)
+export(best_avail_sgp_df)
 export(haid_plot)
 export(kipp_quartile)
 export(norm_sim)
