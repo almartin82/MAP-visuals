@@ -118,7 +118,7 @@ haid_plot <- function(
   
   stopifnot(
     length(df$base_rit) > 0
-    ,length(df$end_rit) > 0
+   ,length(df$end_rit) > 0
   )
   
   #make a psuedo-axis by ordering based on one variable
@@ -237,34 +237,39 @@ haid_plot <- function(
       ,hjust = 0.5
       ,vjust = 0
       ,alpha=p_alpha
-    )  
-  #add segments
-  p <- p +
-    geom_segment(
-      data = df[!is.na(df$end_rit), ]
-      ,aes(
-        xend = end_rit
-        ,yend = y_order
-        ,group = arrow_color_identity
-        ,color = arrow_color_identity
-      )
-      ,arrow = arrow(length = unit(0.1,"cm"))
-    ) + 
-    scale_color_identity()
-  
-  #add RIT text
-  p <- p +
-    geom_text(
-      data = df[!is.na(df$end_rit), ]
-      ,aes(
-        x = end_rit + rit_xoffset
-        ,group = endpoint_color
-        ,color = endpoint_color
-        ,label = end_rit
-        ,hjust = rit_hjust
-      )
-      ,size =p_name_size
     )
+  
+  #only do the following if there is data in end rit
+  if (sum(!is.na(df$end_rit)) > 0) {
+    #add segments
+    p <- p +
+      geom_segment(
+        data = df[!is.na(df$end_rit), ]
+        ,aes(
+          xend = end_rit
+          ,yend = y_order
+          ,group = arrow_color_identity
+          ,color = arrow_color_identity
+        )
+        ,arrow = arrow(length = unit(0.1,"cm"))
+      ) + 
+      scale_color_identity()  
+
+    #add RIT text
+    p <- p +
+      geom_text(
+        data = df[!is.na(df$end_rit), ]
+        ,aes(
+          x = end_rit + rit_xoffset
+          ,group = endpoint_color
+          ,color = endpoint_color
+          ,label = end_rit
+          ,hjust = rit_hjust
+        )
+        ,size =p_name_size
+      )
+  }
+  
   
   #add name labels
   p <- p +
@@ -349,17 +354,6 @@ haid_plot <- function(
   p <- p +
     ggtitle(p_title) +
     xlab('RIT Score')
-  #put df back into global environment (for debugging)
-  barf <<- df
-  
-  #   #TESTING
-  #   p <- p +
-  #   geom_text(
-  #     aes(
-  #       x = 207
-  #      ,label = y_order
-  #     )
-  #   )
   
   #summary labels
   start_labels <- get_group_stats(
