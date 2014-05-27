@@ -87,7 +87,7 @@ s2s_match <- function(.data,
                                   "SpringSpring" = "R22.x"
                                   )
                            )
-    if(!norm.season %in% names(.data)) stop(paste(".data is missing a column named", 
+    if(!as.character(norm.season) %in% names(m.12)) stop(paste(".data is missing a column named", 
                                                   gsub(".x","", norm.season),
                                                        ". You can fix this error by running nwea_growth(). See ?nwea_growth for more details"
                                                        )
