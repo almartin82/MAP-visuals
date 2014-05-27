@@ -103,7 +103,7 @@ s2s_match <- function(.data,
       )
     }
     if(college.ready) {
-      if(!"KIPPTieredGrowth.x" %in% names(.data)) stop(paste(".data is missing a column named", 
+      if(!"KIPPTieredGrowth.x" %in% names(m.12)) stop(paste(".data is missing a column named", 
                                                      "KIPPTieredGrowth",
                                                     ". You can fix this error by running tiered_growth(). See ?tiered_growth for more details"
       )
