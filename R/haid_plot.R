@@ -475,8 +475,8 @@ haid_plot <- function(
   end_labels <- as.data.frame(end_labels, stringsAsFactors = FALSE)
   #grab everything in the start that matches the end
   #this is necessary when there are quartiles present in the end data not present in the start
-  matched_label = start_labels[start_labels$base_quartile_format == end_labels$base_quartile_format, 'base_quartile_format']
-  matched_ypos = start_labels[start_labels$base_quartile_format == end_labels$base_quartile_format, 'avg_y_dummy']
+  matched_label = start_labels[start_labels$base_quartile_format %in% end_labels$base_quartile_format, 'base_quartile_format']
+  matched_ypos = start_labels[start_labels$base_quartile_format %in% end_labels$base_quartile_format, 'avg_y_dummy']
   
   #make it a df
   label_match_df <- data.frame(
