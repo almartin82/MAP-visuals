@@ -172,7 +172,7 @@ haid_plot <- function(
   
   df$baseline_color <- quartile_colors$color[match(df$baseline_quartile, quartile_colors$quartile)]
   df$endpoint_color <- quartile_colors$color[match(df$endpoint_quartile, quartile_colors$quartile)]
-  
+    
   #name colors
   name_colors <- data.frame(
     tier = p_name_color_tiers
@@ -184,12 +184,49 @@ haid_plot <- function(
   
   df$base_quartile_format <- paste('Quartile', as.factor(df$baseline_quartile))
   
+  #massage df so that no quartiles get dropped
+  start_qs <- unique(na.omit(df$baseline_quartile))
+  end_qs <- unique(na.omit(df$endpoint_quartile))
+  missing_qs <- end_qs[!(end_qs %in% start_qs)]
+  
+  #loop over missing qs and insert an empty row into the data frame
+    #dummy row
+    foo <- df[1, ]  
+    foo[1, ] <- NA
+    
+  if (length(missing_qs) > 0) {
+    for (i in missing_qs) {
+      foo[ , c('baseline_quartile', 'endpoint_quartile')] <- i
+      foo[ , c('base_quartile_format')] <- paste('Quartile', i) 
+      
+      #if 1 is missing, insert at y=1
+      if (i == 1) {
+        insert_point <- 1
+      #otherwise insert at max of i-1
+      } else {
+        insert_point <- max(df[df$baseline_quartile < i, 'y_order'], na.rm=T) + 1
+      }
+      
+      df[df$y_order >= insert_point, 'y_order'] <- df[df$y_order >= insert_point, 'y_order'] + 1
+      
+      foo[ , 'y_order'] <- insert_point
+      foo[ , 'base_rit'] <- min(df$base_rit, na.rm=T)
+      foo[ , 'student_name_format'] <- ' '
+      
+      df <- rbind(df, foo)
+    }
+  }
+  
+  #make placeholders white
+  df[df$student_name_format == ' ', 'baseline_color'] <- 'white'
+  df[df$student_name_format == ' ', 'endpoint_color'] <- 'white'
+  
   #base ggplot object
   p <- ggplot(
     data = df
     ,aes(
       x = base_rit
-      ,y = y_order
+     ,y = y_order
     )
   )
   
@@ -217,7 +254,8 @@ haid_plot <- function(
   #typical and college ready goal labels
   p <- p +
     geom_text(
-      aes(
+      data = df[df$student_name_format != ' ', ]
+     ,aes(
         x = base_rit + keep_up_goal
         ,label = base_rit + keep_up_goal
       )  
@@ -228,7 +266,8 @@ haid_plot <- function(
       ,alpha=p_alpha
     ) + 
     geom_text(
-      aes(
+      data = df[df$student_name_format != ' ', ]
+     ,aes(
         x = base_rit + college_ready_goal
         ,label = base_rit + college_ready_goal
       )  
@@ -258,7 +297,7 @@ haid_plot <- function(
     #add RIT text
     p <- p +
       geom_text(
-        data = df[!is.na(df$end_rit), ]
+        data = df[!is.na(df$end_rit) & df$student_name_format != ' ', ]
         ,aes(
           x = end_rit + rit_xoffset
           ,group = endpoint_color
@@ -274,7 +313,8 @@ haid_plot <- function(
   #add name labels
   p <- p +
     geom_text(
-      aes(
+      data = df[df$student_name_format != ' ', ]
+     ,aes(
         x = name_x
         ,label = student_name_format
         ,group = name_color
@@ -288,14 +328,14 @@ haid_plot <- function(
   #negative students start rit is not part of name string.  print to right of baseline
   if (nrow(df[df$neg_flag == 1 & !is.na(df$neg_flag), ]) > 0) {
     p <- p + geom_text(
-      data = df[df$neg_flag == 1 & !is.na(df$neg_flag), ] 
+      data = df[df$neg_flag == 1 & !is.na(df$neg_flag) & df$student_name_format != ' ', ] 
       ,aes(
         x = base_rit + 1
         ,label = base_rit
         ,group = baseline_color
         ,color = baseline_color
       )
-      ,size =p_name_size
+      ,size = p_name_size
     )
   }  
   
@@ -304,7 +344,7 @@ haid_plot <- function(
     geom_point(
       aes(
         group = baseline_color
-        ,color = baseline_color
+       ,color = baseline_color
       )
       ,size = pointsize
     )
@@ -357,41 +397,61 @@ haid_plot <- function(
   
   #summary labels
   start_labels <- get_group_stats(
-    df = df[!is.na(df$base_rit), ]
-    ,grp = 'base_quartile_format'
+    df = df[!is.na(df$base_rit) & df$student_name_format != ' ', ]
+    ,grp = 'baseline_quartile'
     ,RIT = 'base_rit'
     ,dummy_y =  'y_order'
+  )  
+  start_labels$base_quartile_format <- paste('Quartile', start_labels$baseline_quartile)
+    
+  #repeat for end quartile
+  end_labels <- get_group_stats(
+    df = df[!is.na(df$end_rit) & df$student_name_format != ' ', ]
+    ,grp = 'endpoint_quartile'
+    ,RIT = 'end_rit'
+    ,dummy_y =  'y_order'
   )
+  end_labels$base_quartile_format <- paste('Quartile', end_labels$baseline_quartile)
   
+  #calculate x position
+  calc_df <- df[!is.na(df$base_rit) & !is.na(df$end_rit), ]
+  quartile_label_min <- round_any(min(c(calc_df$base_rit, calc_df$end_rit)) - 10, 10, floor) + 10
+  quartile_label_max <- round_any(max(c(calc_df$base_rit, calc_df$end_rit)) + 10, 10, ceiling) - 10 
+
+  #add x position to summary dfs
+  start_labels$quartile_label_pos <- NA
+  
+  if (length(na.omit(start_labels$baseline_quartile) <= 2) > 0) {
+    start_labels[start_labels$baseline_quartile <= 2, 'quartile_label_pos'] <- quartile_label_max
+  }
+
+  if (length(na.omit(start_labels$baseline_quartile) >= 3) > 0) {
+    start_labels[start_labels$baseline_quartile >= 3, 'quartile_label_pos'] <- quartile_label_min
+  }
+
+
+  end_labels$quartile_label_pos <- NA
+  if (length(na.omit(end_labels$endpoint_quartile) <= 2) > 0) {
+    end_labels[end_labels$endpoint_quartile <= 2, 'quartile_label_pos'] <- quartile_label_max
+  }
+
+  if (length(na.omit(end_labels$endpoint_quartile) >= 3) > 0) {
+    end_labels[end_labels$endpoint_quartile >= 3, 'quartile_label_pos'] <- quartile_label_min
+  }
+
   #force to data table
   start_labels <- as.data.table(start_labels)
   
   #turn stats into printable label
   start_labels[ ,count_label := paste0(
     start_season_abbrev, ': ', start_labels$count_students, " students (", round(start_labels$pct_of_total * 100), "%)")]
-  
-  #repeat for end quartile
-  end_labels <- get_group_stats(
-    df = df[!is.na(df$end_rit), ]
-    ,grp = 'endpoint_quartile'
-    ,RIT = 'end_rit'
-    ,dummy_y =  'y_order'
-  )
-  
+
   #force to data table
   end_labels <- as.data.table(end_labels)
   
   #turn stats into printable label
   end_labels[ ,count_label := paste0(
     end_season_abbrev, ': ', end_labels$count_students, " students (", round(end_labels$pct_of_total * 100), "%)")]
-  
-  #calculate x position
-  calc_df <- df[!is.na(df$base_rit) & !is.na(df$end_rit), ]
-  quartile_label_pos <- round_any(min(c(calc_df$base_rit, calc_df$end_rit)) - 10, 10, floor) + 10
-  
-  #add x position to summary dfs
-  start_labels[ ,quartile_label_pos := rep(quartile_label_pos, nrow(start_labels))]
-  end_labels[ ,quartile_label_pos := rep(quartile_label_pos, nrow(end_labels))]
   
   #names have to be the same for the facet to behave properly - 
   #end_labels will have quartile name of 'base_quartile_format' which strictly speaking
@@ -428,7 +488,76 @@ haid_plot <- function(
   
   #for the ones you can match, replace with the adjusted start, so they print below
   #unmatched will remain in the avg/middle position
-  end_labels[end_labels$base_quartile_format == label_match_df$label, 'avg_y_dummy'] <- label_match_df$ypos
+  end_labels[end_labels$base_quartile_format %in% label_match_df$label, 'avg_y_dummy'] <- label_match_df$ypos
+  
+  #backmatch
+    #IN START but NOT END?
+    missing_start <- end_qs[!(end_qs %in% start_qs)]
+    
+    #IN END but NOT START?
+    missing_end <- start_qs[!(start_qs %in% end_qs)]
+  
+    if (length(missing_start) > 0) {
+      foo <- start_labels[0, ]
+      foo[1, ] <- NA
+
+      for (i in missing_start) {
+        foo[, 'base_quartile_format'] <- paste('Quartile', i)
+        foo[, 'count_students'] <- 0
+        foo[, 'count_label'] <- paste0(start_season_abbrev, ': 0 students (0%)')
+
+        if (i <= 2) {
+          foo[, 'quartile_label_pos'] <- quartile_label_max
+        } else if (i >= 3) {
+          foo[, 'quartile_label_pos'] <- quartile_label_min         
+        }
+
+        #if 1 is missing, insert at y=1
+        if (i == 1) {
+          insert_point <- 1
+        #otherwise insert at max of i-1
+        } else {
+          insert_point <- max(df[df$baseline_quartile < i, 'y_order'], na.rm=T) + 1
+        }
+
+        foo[, 'avg_y_dummy'] <- insert_point + 1
+        
+        start_labels <- rbind(start_labels, foo)
+        #matching the other way is different
+        #they are already in end labels, but we need to fix the avg_y_dummy so it matches insert_point
+        end_labels[end_labels$base_quartile_format == paste('Quartile', i), 'avg_y_dummy'] <- insert_point
+      }    
+    }    
+  
+    if (length(missing_end) > 0) {
+      foo <- end_labels[0, ]
+      foo[1, ] <- NA
+
+      for (i in missing_end) {
+        foo[, 'base_quartile_format'] <- paste('Quartile', i)
+        foo[, 'count_students'] <- 0
+        foo[, 'count_label'] <-  paste0(end_season_abbrev, ': 0 students (0%)')
+
+        if (i <= 2) {
+          foo[, 'quartile_label_pos'] <- quartile_label_max
+        } else if (i >= 3) {
+          foo[, 'quartile_label_pos'] <- quartile_label_min         
+        }
+
+        
+        #if 1 is missing, insert at y=1
+        if (i == 1) {
+          insert_point <- 1
+        #otherwise insert at max of i-1
+        } else {
+          insert_point <- max(df[df$baseline_quartile < i, 'y_order'], na.rm=T) + 1
+        }
+
+        foo[, 'avg_y_dummy'] <- insert_point + 1
+        
+        end_labels <- rbind(end_labels, foo)
+      }    
+    }    
   
   #lookup colors
   annotate_colors <- data.frame(
@@ -446,10 +575,10 @@ haid_plot <- function(
       data = start_labels
       ,aes(
         x = quartile_label_pos
-        ,y = avg_y_dummy
-        ,label = count_label
-        ,group = base_quartile_format
-        ,color = color_identity
+       ,y = avg_y_dummy
+       ,label = count_label
+       ,group = base_quartile_format
+       ,color = color_identity
       )
       ,vjust = 0.5
       ,hjust = 0
@@ -460,10 +589,10 @@ haid_plot <- function(
       data = end_labels
       ,aes(
         x = quartile_label_pos
-        ,y = avg_y_dummy
-        ,label = count_label
-        ,group = base_quartile_format  
-        ,color = color_identity
+       ,y = avg_y_dummy
+       ,label = count_label
+       ,group = base_quartile_format  
+       ,color = color_identity
       )
       ,vjust = 0.5
       ,hjust = 0
