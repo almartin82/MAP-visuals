@@ -572,7 +572,20 @@ haid_plot <- function(
   #base students
   p <- p +
     geom_text(
-      data = start_labels
+      data = start_labels[start_labels$baseline_quartile <= 2, ]
+      ,aes(
+        x = quartile_label_pos
+       ,y = avg_y_dummy
+       ,label = count_label
+       ,group = base_quartile_format
+       ,color = color_identity
+      )
+      ,vjust = 0.5
+      ,hjust = 1
+      ,size = annotate_size
+    ) + 
+    geom_text(
+      data = start_labels[start_labels$baseline_quartile >= 3, ]
       ,aes(
         x = quartile_label_pos
        ,y = avg_y_dummy
@@ -584,9 +597,22 @@ haid_plot <- function(
       ,hjust = 0
       ,size = annotate_size
     ) + 
-    #end students      
+    #end students
     geom_text(
-      data = end_labels
+      data = end_labels[end_labels$endpoint_quartile <= 2, ]
+      ,aes(
+        x = quartile_label_pos
+       ,y = avg_y_dummy
+       ,label = count_label
+       ,group = base_quartile_format  
+       ,color = color_identity
+      )
+      ,vjust = 0.5
+      ,hjust = 1
+      ,size = annotate_size
+    ) +
+    geom_text(
+      data = end_labels[end_labels$endpoint_quartile >= 3, ]
       ,aes(
         x = quartile_label_pos
        ,y = avg_y_dummy
