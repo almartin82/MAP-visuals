@@ -218,9 +218,12 @@ haid_plot <- function(
   }
   
   #make placeholders white
-  df[df$student_name_format == ' ', 'baseline_color'] <- 'white'
-  df[df$student_name_format == ' ', 'endpoint_color'] <- 'white'
+  if (sum(df$student_name_format == ' ') > 0) {
+    df[df$student_name_format == ' ', 'baseline_color'] <- 'white'
+    df[df$student_name_format == ' ', 'endpoint_color'] <- 'white'    
+  }
   
+
   #base ggplot object
   p <- ggplot(
     data = df
@@ -257,7 +260,7 @@ haid_plot <- function(
       data = df[df$student_name_format != ' ', ]
      ,aes(
         x = base_rit + keep_up_goal
-        ,label = base_rit + keep_up_goal
+       ,label = base_rit + keep_up_goal
       )  
       ,color = "#CFCCC1"
       ,size = pointsize - 0.5 
@@ -269,7 +272,7 @@ haid_plot <- function(
       data = df[df$student_name_format != ' ', ]
      ,aes(
         x = base_rit + college_ready_goal
-        ,label = base_rit + college_ready_goal
+       ,label = base_rit + college_ready_goal
       )  
       ,color = "#FEBC11"
       ,size = pointsize - 0.5 
@@ -285,7 +288,7 @@ haid_plot <- function(
       geom_segment(
         data = df[!is.na(df$end_rit), ]
         ,aes(
-          xend = end_rit
+           xend = end_rit
           ,yend = y_order
           ,group = arrow_color_identity
           ,color = arrow_color_identity
@@ -299,13 +302,13 @@ haid_plot <- function(
       geom_text(
         data = df[!is.na(df$end_rit) & df$student_name_format != ' ', ]
         ,aes(
-          x = end_rit + rit_xoffset
+           x = end_rit + rit_xoffset
           ,group = endpoint_color
           ,color = endpoint_color
           ,label = end_rit
           ,hjust = rit_hjust
         )
-        ,size =p_name_size
+        ,size = p_name_size
       )
   }
   
@@ -411,7 +414,7 @@ haid_plot <- function(
     ,RIT = 'end_rit'
     ,dummy_y =  'y_order'
   )
-  end_labels$base_quartile_format <- paste('Quartile', end_labels$baseline_quartile)
+  end_labels$base_quartile_format <- paste('Quartile', end_labels$endpoint_quartile)
   
   #calculate x position
   calc_df <- df[!is.na(df$base_rit) & !is.na(df$end_rit), ]
@@ -452,22 +455,7 @@ haid_plot <- function(
   #turn stats into printable label
   end_labels[ ,count_label := paste0(
     end_season_abbrev, ': ', end_labels$count_students, " students (", round(end_labels$pct_of_total * 100), "%)")]
-  
-  #names have to be the same for the facet to behave properly - 
-  #end_labels will have quartile name of 'base_quartile_format' which strictly speaking
-  #is wrong, but if you don't do that ggplot won't facet properly.
-  #reset name of col 1
-  setnames(end_labels, old=1, new='base_quartile_format')
-  #ensures that faceting behaves
-  end_labels$base_quartile_format <- paste('Quartile', end_labels$base_quartile_format)
-  
-  #season 2 is below season 1
-  #end_labels[ ,avg_y_dummy := start_labels[ ,avg_y_dummy] - 3]
-  #first match
-  #end_labels$avg_y_dummy <- end_labels$avg_y_dummy - (1 +  floor(num_stu / 30))
-  
-  #start_labels$color_identity <- annotate_colors$color[match(start_labels$base_quartile_format, annotate_colors$quartile)]
-  
+    
   #make annotation lables so that season 2 is after season 1
   #god this is the absolute worst.
   #begin by flipping back to data frame  
@@ -502,6 +490,7 @@ haid_plot <- function(
       foo[1, ] <- NA
 
       for (i in missing_start) {
+        foo$baseline_quartile <- i
         foo[, 'base_quartile_format'] <- paste('Quartile', i)
         foo[, 'count_students'] <- 0
         foo[, 'count_label'] <- paste0(start_season_abbrev, ': 0 students (0%)')
@@ -534,6 +523,7 @@ haid_plot <- function(
       foo[1, ] <- NA
 
       for (i in missing_end) {
+        foo$endpoint_quartile <- i
         foo[, 'base_quartile_format'] <- paste('Quartile', i)
         foo[, 'count_students'] <- 0
         foo[, 'count_label'] <-  paste0(end_season_abbrev, ': 0 students (0%)')
@@ -550,7 +540,11 @@ haid_plot <- function(
           insert_point <- 1
         #otherwise insert at max of i-1
         } else {
-          insert_point <- max(df[df$baseline_quartile < i, 'y_order'], na.rm=T) + 1
+          if (length(df[df$baseline_quartile < i, 'y_order']) > 0) {
+            insert_point <- max(df[df$baseline_quartile < i, 'y_order'], na.rm=T) + 1
+          } else {
+            insert_point <- 0
+          }
         }
 
         foo[, 'avg_y_dummy'] <- insert_point + 1
@@ -570,10 +564,10 @@ haid_plot <- function(
   
   #add to plot
   #base students
-  p <- p +
-    geom_text(
+  if (nrow(start_labels[start_labels$baseline_quartile <= 2, ]) > 0) {
+    p <- p + geom_text(
       data = start_labels[start_labels$baseline_quartile <= 2, ]
-      ,aes(
+     ,aes(
         x = quartile_label_pos
        ,y = avg_y_dummy
        ,label = count_label
@@ -583,10 +577,13 @@ haid_plot <- function(
       ,vjust = 0.5
       ,hjust = 1
       ,size = annotate_size
-    ) + 
-    geom_text(
+    )    
+  }
+
+  if (nrow(start_labels[start_labels$baseline_quartile >= 3, ]) > 0) {
+    p <- p + geom_text(
       data = start_labels[start_labels$baseline_quartile >= 3, ]
-      ,aes(
+     ,aes(
         x = quartile_label_pos
        ,y = avg_y_dummy
        ,label = count_label
@@ -596,11 +593,13 @@ haid_plot <- function(
       ,vjust = 0.5
       ,hjust = 0
       ,size = annotate_size
-    ) + 
-    #end students
-    geom_text(
+    )
+  }
+  
+  if (nrow(end_labels[end_labels$endpoint_quartile <= 2, ]) > 0) {
+    p <- p + geom_text(
       data = end_labels[end_labels$endpoint_quartile <= 2, ]
-      ,aes(
+     ,aes(
         x = quartile_label_pos
        ,y = avg_y_dummy
        ,label = count_label
@@ -610,10 +609,13 @@ haid_plot <- function(
       ,vjust = 0.5
       ,hjust = 1
       ,size = annotate_size
-    ) +
-    geom_text(
+    )
+  }
+  
+  if (nrow(end_labels[end_labels$endpoint_quartile >= 3, ]) > 0) {
+    p <- p + geom_text(
       data = end_labels[end_labels$endpoint_quartile >= 3, ]
-      ,aes(
+     ,aes(
         x = quartile_label_pos
        ,y = avg_y_dummy
        ,label = count_label
@@ -624,7 +626,7 @@ haid_plot <- function(
       ,hjust = 0
       ,size = annotate_size
     )
-  
+  }
+    
   return(p) 
-  
 }
