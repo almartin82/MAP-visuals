@@ -9,6 +9,6 @@ prep_cdf(regular_cdf)
 \item{regular_cdf}{a NWEA MAP cdf loaded in as a data frame}
 }
 \description{
-\code{prep_cdf} is a utility function that preps a standard NWEA MAP CDF for use with MAPVizier
+\code{prep_cdf} is a wrapper around \code{term_fallwinterspring} and \code {term_map_year_academic}
 }
 
