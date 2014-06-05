@@ -1,0 +1,349 @@
+---
+title: "mapvizier Class Construction"
+author: "Chris Haid"
+date: "June 4, 2014"
+output: html_document
+---
+
+## Motivation
+`mapvizier` is classy and so I think it deserves a class object that we can write our functions against. We will use the *S3* object oriented method dispatch in `R`, which you can learn about [from Hadley Whickham](http://adv-r.had.co.nz/OO-essentials.html)
+
+
+```{r packaes_and_data}
+require(mapvisuals)
+require(dplyr) # make sure you have the latest version
+data(nweamap)
+glimpse(nweamap)
+```
+
+I first want to define a function that separates out term names as per our earlier email and calculates cohort names (i.e., the SY 2013-14 8th grades are in 2018), since it makes sense to do this for the mapvizier class objects:
+
+# Term Split Function
+```{r term_split}
+term_split2 <- function(term_name, grade=NULL){
+  
+  require(stringr)
+  # extract Season
+  Season<-str_extract(term_name, 
+                      "[[:alpha:]]+"
+                      )
+  # extract Year1
+  Year1<-as.integer(str_extract(term_name, 
+                                "[[:digit:]]+"
+                                )
+                    )
+  
+  # extract Year2
+  Year2<-as.integer(gsub("([a-zA-Z]+[[:space:]][[:digit:]]+-)([[:digit:]]+)",
+                         "\\2", 
+                         term_name
+                         )
+                    )
+  # construct School Year (e.g, "2012-2013")
+  SY<-paste(Year1, Year2, sep="-")
+  
+  # calculate Cohort Year
+  if(!is.null(grade)) {
+    CohortYear<-(12-grade)+as.numeric(Year2)
+    #return df
+    x<-data.frame(Season, Year1, Year2, SY, CohortYear, stringsAsFactors = FALSE)
+    x
+   } else {
+    x<-data.frame(Season, Year1, Year2, SY, stringsAsFactors = FALSE)
+    x
+  }
+}
+```
+
+Here's a quick test of that function:
+```{r test_term_split}
+test_termsplit<-term_split2(term_name = nweamap$TermName)
+glimpse(test_termsplit)
+test_termsplit_with_grade<-term_split2(term_name = nweamap$TermName,
+                           grade = nweamap$Grade
+                           )
+glimpse(test_termsplit_with_grade)
+
+```
+
+
+Cool, so that works!  Let's start by making a constructor function, which will in this first instance, simply add the `term_split2` columns to the `nweamap` data. Then I'll add some school abbreviations, KIPP's weird quartile calculation, and KIPP Tiered Growth multipliers (since these functions are already in mapvizier!).
+
+### Creating a class
+We will define a method that calls the constuctor function, does the calculations and appending and returns a new data.frame objectof the class `mapvizier`.
+
+```{r class_constructor1}
+# define a generic 
+mapvizier <- function(x) UseMethod("mapvizier")
+
+# now define the default method (you have to use the . here, which 
+# is proably why you don't want to use dots (.) elsewhere even if 
+# they are super duper easy to type, since no shifting is required)
+mapvizier.default <- function(x){
+  require(dplyr)
+  require(data.table)
+  # coerce to data.frame to be safe
+  x<-as.data.frame(x)
+  
+  x2 <- cbind(x,
+              term_split2(term_name = x$TermName,
+                          grade = x$Grade)
+              )
+  
+  # lookout!  here comes some dplyr sugar to get the munging done
+  # Adding school abbreviations, TestQuartile, and KIPP Tiered Growth
+  x3 <- x2 %>% filter(GrowthMeasureYN=="TRUE") %>%
+     mutate(SchoolInitials   = abbrev(SchoolName), 
+            TestQuartile     = kipp_quartile(TestPercentile),
+            KIPPTieredGrowth = tiered_growth(TestQuartile, Grade)
+         )
+  
+  # let's add some proper growth norms from the growth norms table
+  
+  map_data <- cbind(x3,
+              nwea_growth(x3$Grade, 
+                          x3$TestRITScore, 
+                          x3$MeasurementScale
+                          )
+              )
+  #shit, why not just to all the joins we could ever want on this original data
+  # Create Seaason to Season Numbers
+ year_list<-unique(map_data$Year2)
+
+  map.SS<-rbindlist(lapply(year_list, 
+                         s2s_match, 
+                         .data=map_data, 
+                         season1="Spring", 
+                         season2="Spring", 
+                         typical.growth=T,
+                         college.ready=T
+                         )
+                  )
+ map.FS<-rbindlist(lapply(year_list, 
+                         s2s_match,
+                         .data=map_data, 
+                         season1="Fall", 
+                         season2="Spring", 
+                         typical.growth=T,
+                          college.ready=T
+                                 )
+                          )
+map.FW<-rbindlist(lapply(year_list, 
+                         s2s_match, 
+                        .data=map_data, 
+                         season1="Fall", 
+                         season2="Winter", 
+                         typical.growth=T,
+                         college.ready=T
+                               )
+                        )
+map.WS<-rbindlist(lapply(year_list,
+                         s2s_match, 
+                         .data=map_data, 
+                         season1="Winter", 
+                         season2="Spring", 
+                         typical.growth=T,
+                         college.ready=T
+                         )
+                  )
+map.FF<-rbindlist(lapply(year_list, 
+                         s2s_match, 
+                         .data=map_data, 
+                         season1="Fall", 
+                         season2="Fall", 
+                         typical.growth=T,
+                         college.ready=T
+                         )
+                  )
+
+map.all.growth<-rbindlist(list(map.SS, map.FS, map.FW, map.WS, map.FF))
+  
+# add to mapviz object
+
+mapviz<-list(mapData = map_data,
+             seasonMatched = map.all.growth
+             )
+
+class(mapviz) <- "mapvizier"
+  
+mapviz            
+}
+```
+
+ok, let's see if this fucker works:
+
+```{r mapviz_class_test}
+test_mv<-mapvizier(nweamap)
+str(test_mv)
+```
+
+### Methods 
+Sweet!!!! That works.  So now we can pass something that looks like `nweamap` and add some columns that we use in a lot of visualizations already and get the step of matching seasons out of the way.  So let's write a couple of methods against this class: `print()`, `summary()`, and `plot()` (NB: we will name these function `print.mapvizier`, `summary.mapvizier()`, and `plot.mapvizier()`, which allows `R` to use method dispatch when we call `print(x)` and `x` is `mapvizier` object).
+
+#### print()
+```{r print.mapvizier}
+print.mapvizier <-  function(x, ...) {
+  require(dplyr)
+  
+  #gather some summary stats
+  n_sy <- length(unique(x$mapData$SY))
+  min_sy <- min(x$mapData$SY)
+  max_sy <- max(x$mapData$SY)
+  n_students <- length(unique(x$mapData$StudentID))
+  n_schools <- length(unique(x$mapData$SchoolName))
+  growthseasons <- unique(x$seasonMatched$GrowthSeason)
+  n_growthseasons <- length(growthseasons)
+  
+  cat("A mapvizier object repesenting:\n- ")
+  cat(paste(n_sy))
+  cat(" school years from SY")
+  cat(paste(min_sy))
+  cat(" to SY")
+  cat(paste(max_sy))
+  cat(";\n- ")
+  cat(paste(n_students))
+  cat(" students from ")
+  cat(paste(n_schools))
+  cat(" schools;\n- and, ")
+  cat(paste(n_growthseasons))
+  cat(" growth seasons:\n    ")
+  cat(paste(growthseasons, collapse = ",\n    "))
+
+  
+  }
+
+#I'm adding a glimpse method too, since it is cool and I want to see both attached dataframes is the mapvizier object
+
+# create genereic
+glimpse<-function(x) UseMethod("glimpse")
+
+# assigne dplry's glimpse to glimpse.default to preserve glimpse defualt 
+# behavrio
+glimpse.default <- function(tbl, width) dplyr::glimpse(tbl, width=getOption("width"))
+
+# Now create method for mapvizier class
+glimpse.mapvizier <- function(tbl, width=getOption("width")){
+  #require(dplry)
+  cat("mapData:\n")
+  print(dplyr::glimpse(tbl$mapData, width))
+    cat("seasonMatched:\n")
+  print(dplyr::glimpse(tbl$seasonMatched, width))
+}
+```
+And now let's see if these work:
+
+```{r test_print}
+test_mv # this automatically calls the print method
+print(test_mv)  # same as above
+
+glimpse(test_mv)
+```
+
+Excelent! This is going great. Lets do a dead simple summary method:
+
+#### summary()
+```{r summary_method}
+
+summary.mapvizier <- function(object, ..., digits){
+  
+  mapData<-group_by(as.data.frame(object$seasonMatched), 
+                    SY.2, 
+                    GrowthSeason, 
+                    SchoolInitials, 
+                    Grade.2, 
+                    MeasurementScale
+                    )
+  mapSummary <- dplyr::summarize(mapData,
+                          N = n(),
+                          N_Typical = sum(MetTypical),
+                          Pct_Typical = round(sum(MetTypical)/N,2),
+                          N_CollegeReady = sum(MetCollegeReady),
+                          Pct_CollegeReady = round(sum(MetCollegeReady)/N,2),
+                          N_50th_Pctl_S1 = sum(TestPercentile>=50),
+                          Pct_50th_Pctl_S1= round(sum(TestPercentile>=50)/N,2),
+                          N_50th_Pctl_S2 = sum(TestPercentile.2>=50),
+                          Pct_50th_Pctl_S2 = round(sum(TestPercentile.2>=50)/N,2),
+                          N_75th_Pctl_S1 = sum(TestPercentile>=75),
+                          Pct_75th_Pctl_S1 = round(sum(TestPercentile>=75)/N,2),
+                          N_75th_Pctl_S2 = sum(TestPercentile.2>=75),
+                        Pct_75th_Pctl_S2 = round(sum(TestPercentile.2>=75)/N,2)
+  )
+
+  
+  setnames(mapSummary, 
+         c("SchoolInitials", "Grade.2", "MeasurementScale", "SY.2"),
+         c("School", "Grade", "Subject", "SY")
+         )
+
+#class(mapSummary)<-"mapvizierSummary"  
+  
+class(mapSummary)<-c("mapvizierSummary", class(mapSummary))
+
+#return
+mapSummary
+  
+}
+
+```
+And again, let's test this:
+
+```{r test_summary_method}
+test_mv_summary<-summary(test_mv)
+
+test_mv_summary
+```
+
+
+#### plot()
+
+Finally let's do a plot method on the summary object
+
+```{r plot_method}
+plot.mapvizierSummary <-  function(x, 
+                                   growthseason="Fall - Spring", 
+                                   subjects=c("Reading", 
+                                              "Mathematics", 
+                                              "General Science"),
+                                   grades=c(2:8)){
+  require(ggplot2)
+  x<-as.data.frame(x)
+  plot_data <- filter(x, 
+                      GrowthSeason == growthseason,
+                      Subject %in% subjects,
+                      Grade %in% grades
+                      )
+  
+  p.long<-ggplot(plot_data, 
+                 aes(x=gsub("20","",SY), 
+                     y=Pct_Typical*100
+                     )
+                 ) + 
+  geom_line(aes(group=School, color=School)) +
+  geom_point(color="white", size=8.75) +
+  geom_hline(aes(yintercept=80), color="lightgray") +
+  geom_text(aes(label=paste(Pct_Typical*100,"%",sep=""), 
+                       color=School),
+            size=3) +
+  scale_color_manual(values = c("#439539", "purple", "#60A2D7", "#C49A6C")) +
+  facet_grid(Subject~Grade) +
+  theme_bw() + 
+  theme(legend.position="bottom") +
+  xlab("School Year") +
+  ylab("% Meets/Exceeds\nTypical Growth" )  
+  
+  # return
+  p.long
+}
+```
+
+let's try plotting:
+
+```{r plot, fig.height=6, fig.width=11, dev='svg'}
+plot(test_mv_summary)
+```
+
+Now that is cooking with gas!!!
+
+
+
+
