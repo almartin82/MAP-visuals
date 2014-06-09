@@ -19,11 +19,11 @@ fall_spring_me <- function(grade_level) {
   #S observations are decimal 0s
   } else if(grade_level %% 1 == 0) {
     return(paste(round(grade_level, 0), 'S', sep = ''))
-  #test for F and W; note that rounding is required or this misbehaves (?)
+  #test for F and W
   } else if(round(grade_level %% 1,1) == 0.2) {
-    return(paste(round(grade_level, 0) + 1, 'F', sep = ''))
+    return(paste(ceiling(grade_level), 'F', sep = ''))
   } else if(round(grade_level %% 1,2) == 0.5) {
-    return(paste(round(grade_level, 0), 'W', sep = ''))
+    return(paste(ceiling(grade_level), 'W', sep = ''))
   } else {
     return(NA)
   }

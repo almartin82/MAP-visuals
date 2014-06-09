@@ -31,13 +31,30 @@ height_weight_npr <- function(
   norms_dense$grade_mod <- sapply(norms_dense$fallwinterspring, grade_level_season)
   norms_dense$grade <- norms_dense$grade + norms_dense$grade_mod
   
+  #match df to account for sparsity of NWEA norms
+  match_df <- data.frame(
+    measurementscale = c('Reading', 'Mathematics', 'Science - General Science', 'Language Usage')
+   ,match_min = c(-0.8, -0.8, 3, 2)
+   ,match_max = c(11, 11, 10, 11)
+   ,n_row = c(15, 15, 10, 12)
+  )
+  
+  npr_grades <- list(
+    'Reading' = c(-3,-0.8,0,1,2,3,4,5,6,7,8,9,10,11,14)
+   ,'Mathematics' = c(-3,-0.8,0,1,2,3,4,5,6,7,8,9,10,11,14)
+   ,'Science - General Science' = c(-3,3,4,5,6,7,8,9,10,14)
+   ,'Language Usage' = c(-3,2,3,4,5,6,7,8,9,10,11,14)
+  )
+  
+  n_rep <- match_df[match_df$measurementscale==desired_subj, 'n_row']
+  
   #add y axis margins
-  placeholder1 <- norms_dense[norms_dense$grade == 11.0,]
+  placeholder1 <- norms_dense[norms_dense$grade==match_df[match_df$measurementscale==desired_subj, 'match_max'], ]
   #arbitrary, just needs to be bigger than 11
   placeholder1$grade <- 14
   norms_dense <- rbind(norms_dense, placeholder1)
   
-  placeholder2 <- norms_dense[norms_dense$grade == -0.8,]
+  placeholder2 <- norms_dense[norms_dense$grade==match_df[match_df$measurementscale==desired_subj, 'match_min'],]
   #arbitrary, just needs to be smaller than -0.8
   placeholder2$grade <- -3
   norms_dense <- rbind(norms_dense, placeholder2)
@@ -45,7 +62,8 @@ height_weight_npr <- function(
 
   #had a lot of trouble here. 
     #cutting into ribbon bins
-    e$npr_grades <- c(-3,-0.8,0,1,2,3,4,5,6,7,8,9,10,11,14)
+    e$npr_grades <- npr_grades[[desired_subj]]
+  
     e$nprs <- c(1,5,10,20,30,40,50,60,70,80,90,95,99)
     
     e$npr_band01 <- subset(e$norms_dense, percentile == e$nprs[1])
@@ -66,18 +84,18 @@ height_weight_npr <- function(
     #make them per band, then rbind  
       #first make the top and bottom - custom
       e$df_npr1 <- data.frame(
-        rib = rep('below_1', 15)
+        rib = rep('below_1', n_rep)
        ,x = e$npr_band01$grade
         #dummy value - just needs to be small
-       ,ymin = rep(100, 15)
+       ,ymin = rep(100, n_rep)
        ,ymax = e$npr_band01$RIT
       )
       e$df_npr99 <- data.frame(
-        rib = rep('above_99', 15)
+        rib = rep('above_99', n_rep)
        ,x = e$npr_band99$grade
         #dummy value - just needs to be big
        ,ymin = e$npr_band99$RIT
-       ,ymax = rep(300, 15)
+       ,ymax = rep(300, n_rep)
       )
      e$df <- rbind(e$df_npr1, e$df_npr99)
    
@@ -98,7 +116,7 @@ height_weight_npr <- function(
        
        #make a new df for this ribbon
        inner_df <- data.frame(
-         rib = rep(new_df_name, 15)
+         rib = rep(new_df_name, n_rep)
         ,x = e$npr_grades
         ,ymin = lower$RIT
         ,ymax = upper$RIT
@@ -179,7 +197,7 @@ height_weight_npr <- function(
   } else if (grepl('small numbers', annotation_style)) {
     npr_annotation <- geom_text(
       aes(
-        x = GRADE
+        x = grade
        ,y = RIT
        ,label = percentile
       )
