@@ -3,6 +3,7 @@
 S3method(glimpse,default)
 S3method(glimpse,mapvizier)
 S3method(mapvizier,default)
+S3method(plot,mapvizierSummary)
 S3method(print,mapvizier)
 export(abbrev)
 export(becca_plot)
