@@ -7,18 +7,18 @@
 #' This function returns a data framre with \code{length(x)} rows that separates a TermName character
 #' vector into the following components (here we use "Spring 2012-2013" as en example 
 #' element of the vector:
-#' \begin{itemize}
+#' \itemize{
 #' \item  Season ("Spring"),
 #' \item  Year1 (2012), 
 #' \item  Year2 (2013), 
 #' \item  SY (i.e School Year, "2013-2014").
-#' \end{itemize}
-#' In addition, if a \code{\length(x)} vector of grade levels is passed to the optional second argument
+#' }
+#' In addition, if a \code{length(x)} vector of grade levels is passed to the optional second argument
 #' then an additional column will be added to the data frame:
-#' \begin{itemize}
+#' \itemize{
 #' \item  CohortYear (HS graduation year based on grade and year2, so an 7th grader in spring 2013 would be 
 #' in the class of 2018).
-#' \end(itemize)
+#' }
 #' 
 #' @param term_name character vector of term names from NWEA CDF. 
 #' @param grade (optional, default = \code{NULL}) integer vector of grade levels
