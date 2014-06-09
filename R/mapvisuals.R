@@ -10,5 +10,6 @@
 #' @import data.table
 #' @import ggplot2
 #' @import dplyr
+#' @import stringr
 #' 
 NULL
