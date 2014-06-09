@@ -4,7 +4,7 @@
 #'  prints to console glimpse of a the first lines of a \code{mapvizier} object's
 #'  components.
 #'
-#' @details Essentialy extendls Hadley Wickham's \code{glimpse} function from 
+#' @details Essentialy extends Hadley Wickham's \code{glimpse} function from 
 #' the \code{dplyr} package to work with \code{mapvizier} objects.  \code{mapvizier}
 #' objects are lists of two data frames (\code{mapData} and \code{seasonMatched}). This
 #' method works over both data frames. 
