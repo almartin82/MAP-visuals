@@ -12,6 +12,6 @@ fall_spring_me(grade_level)
 a string
 }
 \description{
-\code{fall_spring_me} tranforms grade levels into labels for charts; eg 4.3 -> F5
+\code{fall_spring_me} tranforms grade levels into labels for charts; eg 4.2 -> F5
 }
 

@@ -3,7 +3,7 @@
 \alias{summary.mapvizier}
 \title{summary method for \code{mapvizier} class}
 \usage{
-summary.mapvizier(object, ..., digits = 2)
+\method{summary}{mapvizier}(object, ..., digits = 2)
 }
 \arguments{
 \item{x}{a \code{mapvizier} object}
