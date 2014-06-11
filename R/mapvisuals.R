@@ -9,6 +9,8 @@
 #' @import assertthat
 #' @import data.table
 #' @import ggplot2
+#' @import reshape
+#' @import plyr
 #' @import dplyr
 #' @import stringr
 #' 
