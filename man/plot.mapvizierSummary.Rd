@@ -5,7 +5,7 @@
 \usage{
 \method{plot}{mapvizierSummary}(x, growthseason = "Fall - Spring",
   subjects = c("Reading", "Mathematics", "General Science"),
-  grades = c(2:8), years = NULL)
+  grades = c(2:8), years = NULL, metric = "Typical")
 }
 \arguments{
 \item{x}{a \code{mapvizierSummary} object}
@@ -32,6 +32,14 @@
 \item{years}{integer vector with years of second test year in term names (i.e.,
 to plot results from SY2010-2011, SY 2011-2012, and SY 2012-2013, you should pass the
 vector \code(c(2011, 2012, 2013)) or \code(c(2011:2013))).}
+
+\item{metric}{character value indicating which MAP measurement to plot. Choices are:
+\itemize{
+\item "Typical": % Meets/Exceeds\nTypical Growth,
+\item "CR": % Meets/Exceeds\nCollege Ready Growth,
+\item "50th" = % Greater than\n50th Percentile, Season 2,
+\item "75th" = % Greater than\75th Percentile, Season 2.
+}}
 }
 \value{
 a \code{gglot2} object
