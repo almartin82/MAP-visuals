@@ -32,7 +32,6 @@
 #' }
 #' @param ... arguments passed to \code{\link[dplyr]{filter}} use to subset \code{x}.
 #' @return a ggplot2 object
-#' @export
 #' @examples 
 #' data(nweamap)
 #' x<-mapvizier(nweamap)
@@ -42,6 +41,8 @@
 #'              MeasurementScale=="Mathematics", 
 #'              Year2==2014, 
 #'              Season=="Spring")
+#'
+#'@export
 strands_plot<-function(.data, ...) {
   
   # capture filter arguments
