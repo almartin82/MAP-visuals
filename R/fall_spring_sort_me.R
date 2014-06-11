@@ -11,21 +11,21 @@
 
 fall_spring_sort_me <- function(grade_level) {
   #K is weird edge case
-  if(grade_level == -0.7) {
+  if(grade_level == -0.8) {
     return('K_1')
-  } else if(grade_level == -0.35) {
+  } else if(grade_level == -0.5) {
     return('K_2')
   } else if(grade_level == 0) {
     return('K_3')
   #S observations are decimal 0s
   } else if(grade_level %% 1 == 0) {
-    return(paste(round(grade_level, 0), '_3', sep = ''))
+    return(paste0(round(grade_level, 0), '_3'))
   #test for F and W; note that rounding is required or this misbehaves (?)
-  } else if(round(grade_level %% 1,1) == 0.3) {
-    return(paste(round(grade_level, 0) + 1, '_1', sep = ''))
-  } else if(round(grade_level %% 1,2) == 0.65) {
-    return(paste(round(grade_level, 0), '_2', sep = ''))
+  } else if(round(grade_level %% 1,1) == 0.2) {
+    return(paste0(ceiling(grade_level), '_1'))
+  } else if(round(grade_level %% 1,2) == 0.5) {
+    return(paste0(ceiling(grade_level), '_2'))
   } else {
     return(NA)
-  }
+  }  
 }
