@@ -18,7 +18,7 @@
 #' 
 #' data(nweamap)
 #' x<-mapvizier(nweamap)
-#' tr(x)
+#' str(x)
 
 #' @export
 mapvizier <- function(x) UseMethod("mapvizier")
@@ -114,3 +114,11 @@ mapvizier.default <- function(x){
   
   mapviz            
 }
+
+#' @title Reports whether x is a mapvizier object
+#'
+#' @description
+#' Reports whether x is a mapvizier object
+#' @param x an object to test
+#' @export
+is.mapvizier <- function(x) inherits(x, "mapvizier")

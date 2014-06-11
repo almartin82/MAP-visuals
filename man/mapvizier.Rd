@@ -28,6 +28,6 @@ require(mapvizier)
 
 data(nweamap)
 x<-mapvizier(nweamap)
-tr(x)
+str(x)
 }
 
