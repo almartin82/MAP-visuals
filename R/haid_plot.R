@@ -209,7 +209,7 @@ haid_plot <- function(
   df$student_name_format <- ifelse(is.na(df$student_name_format), df$student_name, df$student_name_format)    
   
   #composite name position vector - if growth is NEGATIVE, use the endpoint
-  df$name_x <- ifelse(df$neg_flag == 1, df$end_rit - 3, df$base_rit - 0.25)
+  df$name_x <- ifelse(df$neg_flag == 1, df$end_rit - 6, df$base_rit - 0.25)
   #NAs
   df$name_x <- ifelse(is.na(df$name_x), df$base_rit - 0.25, df$name_x)
   
