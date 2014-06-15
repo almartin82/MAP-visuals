@@ -3,7 +3,7 @@
 \alias{haid_plot}
 \title{Chris Haid's Waterfall-Rainbow-Arrow Chart}
 \usage{
-haid_plot(df, student_col_name, start_col_name, end_col_name,
+haid_plot(df, ..., student_col_name, start_col_name, end_col_name,
   start_percentile_col_name, end_percentile_col_name, keep_up_col_name,
   col_ready_col_name, start_season_abbrev, end_season_abbrev,
   growth_status_col_name, name_status_col_name, y_sort_column, p_title = "",
@@ -12,8 +12,11 @@ haid_plot(df, student_col_name, start_col_name, end_col_name,
   p_name_size = 3, p_alpha = 1)
 }
 \arguments{
-\item{df}{data.frame with columns for  RIT scores (start and/or end season), predicted typical and college ready
-growth, growth status, etc.}
+\item{df}{either a \code{mapvizier} object or  data frame with columns for  RIT scores (start and/or end season), predicted typical and college ready
+growth, growth status, etc. (That is, all the columns named below).}
+
+\item{...}{arguments passed to \code{\link[dplyr]{filter}} used to subset the \code{\link{mapvizier}}
+objeect \code{df}.  These arguments are ignored if the data frame is not a \code{\link{mapvizier}} object.}
 
 \item{student_col_name}{string identifying colummn in \code{df} of student names.}
 
