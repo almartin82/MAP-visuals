@@ -202,12 +202,14 @@ haid_plot <- function(
   df$neg_flag <- ifelse(df$end_rit <= df$base_rit, 1, 0)
   
   #tag names
-  df$student_name_format <- ifelse(df$neg_flag == 1, df$student_name, paste(df$student_name, df$base_rit, " "))
+  df$student_name_format <- ifelse(df$neg_flag == 1, df$student_name, paste0(df$student_name, " ", 
+                                                                            df$base_rit, " ", 
+                                                                            "(", df$baseline_percentile, ") "))
   #NAs
   df$student_name_format <- ifelse(is.na(df$student_name_format), df$student_name, df$student_name_format)    
   
   #composite name position vector - if growth is NEGATIVE, use the endpoint
-  df$name_x <- ifelse(df$neg_flag == 1, df$end_rit - 2.5, df$base_rit - 0.25)
+  df$name_x <- ifelse(df$neg_flag == 1, df$end_rit - 3, df$base_rit - 0.25)
   #NAs
   df$name_x <- ifelse(is.na(df$name_x), df$base_rit - 0.25, df$name_x)
   
@@ -365,7 +367,7 @@ haid_plot <- function(
            x = end_rit + rit_xoffset
           ,group = endpoint_color
           ,color = endpoint_color
-          ,label = end_rit
+          ,label = paste0(end_rit, " (", endpoint_percentile, ")")
           ,hjust = rit_hjust
         )
         ,size = p_name_size
