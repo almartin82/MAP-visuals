@@ -211,7 +211,7 @@ haid_plot <- function(
   #NAs
   df$name_x <- ifelse(is.na(df$name_x), df$base_rit - 0.25, df$name_x)
   
-  df$rit_xoffset <- ifelse(df$neg_flag == 1, -.25, .3)
+  df$rit_xoffset <- ifelse(df$neg_flag == 1, -.25, .25)
   df$rit_hjust <- ifelse(df$neg_flag == 1, 1, 0)
   
   #colors for identity!
@@ -393,7 +393,7 @@ haid_plot <- function(
     p <- p + geom_text(
       data = df[df$neg_flag == 1 & !is.na(df$neg_flag) & df$student_name_format != ' ', ] 
       ,aes(
-        x = base_rit + 1
+        x = base_rit + 1.5
         ,label = base_rit
         ,group = baseline_color
         ,color = baseline_color
