@@ -202,7 +202,7 @@ haid_plot <- function(
   df$neg_flag <- ifelse(df$end_rit <= df$base_rit, 1, 0)
   
   #tag names
-  df$student_name_format <- ifelse(df$neg_flag == 1, df$student_name, paste(df$student_name, df$base_rit))
+  df$student_name_format <- ifelse(df$neg_flag == 1, df$student_name, paste(df$student_name, df$base_rit, " "))
   #NAs
   df$student_name_format <- ifelse(is.na(df$student_name_format), df$student_name, df$student_name_format)    
   
