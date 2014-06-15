@@ -105,6 +105,7 @@ haid_plot <- function(
     df$growth_status[df$TestRITScore.2 >= df$CollegeReadyTarget]<-"College Ready"
     df$growth_status[df$TestRITScore.2 < df$TestRITScore]<-"Negative"
     
+    df$name_status<-as.character(df$TestQuartile)
     df$name_status[df$growth_status=="Negative"]<-"Negative"
     
     #season names
