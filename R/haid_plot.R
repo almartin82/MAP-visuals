@@ -9,8 +9,10 @@
 #' then arrows between estimated RIT scores for the two seasons are added to plot and are color coded
 #' based on the amount of growth attained (postive, typical, college ready, and negative)
 #' 
-#' @param df data.frame with columns for  RIT scores (start and/or end season), predicted typical and college ready
-#' growth, growth status, etc.
+#' @param df either a \code{mapvizier} object or  data frame with columns for  RIT scores (start and/or end season), predicted typical and college ready
+#' growth, growth status, etc. (That is, all the columns named below).
+#' @param ... arguments passed to \code{\link[dplyr]{filter}} used to subset the \code{\link{mapvizier}} 
+#' objeect \code{df}.  These arguments are ignored if the data frame is not a \code{\link{mapvizier}} object.
 #' @param student_col_name string identifying colummn in \code{df} of student names.
 #' @param start_col_name string identifying colummn in \code{df} of first term's RIT score.
 #' @param end_col_name string identifying colummn in \code{df} of second term's RIT score.
@@ -45,6 +47,7 @@
 
 haid_plot <- function(
   df
+  ,... #these are passed to dplyr::filter
   #column identifiers
   ,student_col_name
   #RIT
@@ -87,28 +90,84 @@ haid_plot <- function(
   pointsize <- 2.5
   segsize <- 1
   annotate_size <- 5
+
+  # Check to see if object passed in is a mapvizier object
+  if(inherits(df, "mapvizier")){
+    arg<-dots(...)
+    # extract seasonMatched as data.frame and filter passed via ...
+    df<-as.data.frame(df$seasonMatched) %>% 
+      filter(...) %>%
+      mutate(student_name=paste(StudentFirstname, StudentLastname))
+
+    # Calculate growth statuses
+    df$growth_status[df$TestRITScore.2 >= df$TestRITScore]<-"Positive"
+    df$growth_status[df$TestRITScore.2 >= df$TypicalTarget]<-"Typical"
+    df$growth_status[df$TestRITScore.2 >= df$CollegeReadyTarget]<-"College Ready"
+    df$growth_status[df$TestRITScore.2 < df$TestRITScore]<-"Negative"
+    
+    df$name_status[df$growth_status=="Negative"]<-"Negative"
+    
+    #season names
+    start_season_abbrev <-unique(df$Season)  
+    end_season_abbrev <-unique(df$Season.2)
+    
+    p_arrow_tiers <- c("Positive", "Typical", "College Ready", "Negative")
+    
+    #set default settings if not provided 
+    if(missing(p_arrow_colors)) p_arrow_colors <- c("tan4", "snow4", "gold", "red")
+    if(missing(p_name_colors)) p_name_colors <- c("red", "#f3716b", "#79ac41", "#1ebdc2", "#a57eb8")
+    if(missing(p_name_color_tiers)) p_name_color_tiers<-c("Negative", "1","2","3","4")
   
-  #copy the sort column to a new column
-  df$sort_column <- df[ , y_sort_column]
-  #data transformations
-  #haid plot is self-munging!
-  #the theory here is that it is easier to work inside of ggplot's calling environment
-  #IF YOU KNOW WHAT THINGS ARE CALLED.  so let's have the user pass a series of identifiers
-  #that indicate which column in their df has key data.  then we'll rename the headers of
-  #the passed df so that our transformations and ggplot calls can be as simple as possible. 
-  colnames(df)[colnames(df) == student_col_name] <- 'student_name'
-  #RIT
-  colnames(df)[colnames(df) == start_col_name] <- 'base_rit'
-  colnames(df)[colnames(df) == end_col_name] <- 'end_rit'
-  #percentile
-  colnames(df)[colnames(df) == start_percentile_col_name] <- 'baseline_percentile'
-  colnames(df)[colnames(df) == end_percentile_col_name] <- 'endpoint_percentile'
-  #goals
-  colnames(df)[colnames(df) == keep_up_col_name] <- 'keep_up_goal'
-  colnames(df)[colnames(df) == col_ready_col_name] <- 'college_ready_goal'
-  #other
-  colnames(df)[colnames(df) == growth_status_col_name] <- 'growth_status'
-  colnames(df)[colnames(df) == name_status_col_name] <- 'name_status'
+    
+    #copy the sort column to a new column
+    df$sort_column <- df[ , "TestRITScore"]
+    #data transformations
+    #haid plot is self-munging!
+    #the theory here is that it is easier to work inside of ggplot's calling environment
+    #IF YOU KNOW WHAT THINGS ARE CALLED.  so let's have the user pass a series of identifiers
+    #that indicate which column in their df has key data.  then we'll rename the headers of
+    #the passed df so that our transformations and ggplot calls can be as simple as possible. 
+    
+    #colnames(df)[colnames(df) == student_col_name] <- 'student_name'
+    #RIT
+    colnames(df)[colnames(df) == "TestRITScore"] <- 'base_rit'
+    colnames(df)[colnames(df) == "TestRITScore.2"] <- 'end_rit'
+    #percentile
+    colnames(df)[colnames(df) == "TestPercentile"] <- 'baseline_percentile'
+    colnames(df)[colnames(df) == "TestPercentile.2"] <- 'endpoint_percentile'
+    #goals
+    colnames(df)[colnames(df) == "TypicalGrowth"] <- 'keep_up_goal'
+    colnames(df)[colnames(df) == "CollegeReadyGrowth"] <- 'college_ready_goal'
+    #other
+    #colnames(df)[colnames(df) == growth_status_col_name] <- 'growth_status'
+    #colnames(df)[colnames(df) == name_status_col_name] <- 'name_status'
+    
+    
+  } else {
+    #copy the sort column to a new column
+    df$sort_column <- df[ , y_sort_column]
+    #data transformations
+    #haid plot is self-munging!
+    #the theory here is that it is easier to work inside of ggplot's calling environment
+    #IF YOU KNOW WHAT THINGS ARE CALLED.  so let's have the user pass a series of identifiers
+    #that indicate which column in their df has key data.  then we'll rename the headers of
+    #the passed df so that our transformations and ggplot calls can be as simple as possible. 
+    colnames(df)[colnames(df) == student_col_name] <- 'student_name'
+    #RIT
+    colnames(df)[colnames(df) == start_col_name] <- 'base_rit'
+    colnames(df)[colnames(df) == end_col_name] <- 'end_rit'
+    #percentile
+    colnames(df)[colnames(df) == start_percentile_col_name] <- 'baseline_percentile'
+    colnames(df)[colnames(df) == end_percentile_col_name] <- 'endpoint_percentile'
+    #goals
+    colnames(df)[colnames(df) == keep_up_col_name] <- 'keep_up_goal'
+    colnames(df)[colnames(df) == col_ready_col_name] <- 'college_ready_goal'
+    #other
+    colnames(df)[colnames(df) == growth_status_col_name] <- 'growth_status'
+    colnames(df)[colnames(df) == name_status_col_name] <- 'name_status'
+  }
+  
+  
   
   #if a student doesn't have a base rit, plot will break
   ommitted_count <- sum(is.na(df$base_rit))
