@@ -82,7 +82,6 @@ becca_plot2.mapvizier <- function(.data, ...
                                                     MeasurementScale %in% c("Reading", "Mathematics")
                                   )){
 
-  #   args<-dots(...)
     # Extract mapData from mapvizier object
    .data<-as.data.frame(.data$mapData) 
  
@@ -94,16 +93,60 @@ becca_plot2.mapvizier <- function(.data, ...
   gls<-unlist(lapply(.data$Season, grade_level_season))
   .data$GradeLevelSeason <- .data$Grade-gls
   
-  
-  p<-becca_plot(.data
-                ,school_name_column = 'SchoolInitials'
-                ,cohort_name_column = 'CohortYear'
-                ,academic_year_column = 'Year2'
-                ,grade_level_season_column = 'GradeLevelSeason'
-                ,measurement_scale_column = 'MeasurementScale'
-                ,percentile_column = 'TestPercentile'
-                ,...
-  )
+
+  # check for facets call and change formula to proper formula name
+  func_args<-dots(...)
+  if ("facets" %in% names(unlist(func_args))){
+    
+    
+    facets<-as.formula(func_args$facets)
+    lhs<-as.character(facets[[2]])
+    rhs<-as.character(facets[[3]])
+    
+    
+    lhs<-switch(lhs,
+                'SchoolIntials' =' SCH_ABBREV',
+                'CohortYear' = 'COHORT',
+                'Year2'  = 'MAP_YEAR_ACADEMIC',
+                'GradeLevelSeason' = 'GRADE_LEVEL_SEASON',
+                'MeasurementScale' = 'MEASUREMENTSCALE',
+                'TestPercentile' = 'PERCENTILE_2011_NORMS'
+    )
+    
+    rhs<-switch(rhs,
+                'SchoolIntials' =' SCH_ABBREV',
+                'CohortYear' = 'COHORT',
+                'Year2'  = 'MAP_YEAR_ACADEMIC',
+                'GradeLevelSeason' = 'GRADE_LEVEL_SEASON',
+                'MeasurementScale' = 'MEASUREMENTSCALE',
+                'TestPercentile' = 'PERCENTILE_2011_NORMS'
+    )
+    
+    func_args$facets<-as.character(paste(lhs, "~", rhs))
+    
+    func_args$.data <- .data
+    func_args$school_name_column <- 'SchoolInitials'
+    func_args$cohort_name_column <-'CohortYear'
+    func_args$academic_year_column <- 'Year2'
+    func_args$grade_level_season_column <- 'GradeLevelSeason'
+    func_args$measurement_scale_column <- 'MeasurementScale'
+    func_args$percentile_column <- 'TestPercentile'
+    
+    # Use do call to pass becca_plot() its arguments in a function
+    
+    p<-do.call(becca_plot, args = func_args)
+    
+  } else {
+    p<-becca_plot(.data
+                  ,school_name_column = 'SchoolInitials'
+                  ,cohort_name_column = 'CohortYear'
+                  ,academic_year_column = 'Year2'
+                  ,grade_level_season_column = 'GradeLevelSeason'
+                  ,measurement_scale_column = 'MeasurementScale'
+                  ,percentile_column = 'TestPercentile'
+                  ,...
+    )
+  }
   
   p
   
