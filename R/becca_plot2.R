@@ -84,7 +84,7 @@ becca_plot2.mapvizier <- function(.data, ...
 
   # check to see if subsetting argument is missing
   if(missing(subsetting)){ 
-    stop(paste("mapvizier objects must be including a subsetting argument.\n",
+    stop(paste("mapvizier objects must include a subsetting argument.\n",
                "You should pass something like subsetting=filter(CohortYear==2018).\n",
                "Type ?becca_plot2 or ?filter for more information."
                )
