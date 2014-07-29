@@ -6,7 +6,6 @@ Date: 2013-06-26
 Author: Andrew Martin, Chris Haid
 Maintainer: <amartin@teamschools.org>
 Description: Functions that support analysis of NWEA MAP assessment data
-License: Creative Commons Attribution-NonCommercial-NoDerivs
 Depends:
     ggplot2,
     grid,
