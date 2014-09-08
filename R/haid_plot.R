@@ -476,7 +476,11 @@ haid_plot <- function(
     ,RIT = 'end_rit'
     ,dummy_y =  'y_order'
   )
-  end_labels$base_quartile_format <- paste('Quartile', end_labels$endpoint_quartile)
+  
+  if (length(na.omit(end_labels$endpoint_quartile)) > 0) {
+    end_labels$quartile_label_pos <- NA
+    end_labels$base_quartile_format <- paste('Quartile', end_labels$endpoint_quartile)
+  }
   
   #calculate x position
   calc_df <- df[!is.na(df$base_rit) & !is.na(df$end_rit), ]
@@ -495,7 +499,7 @@ haid_plot <- function(
   }
 
 
-  end_labels$quartile_label_pos <- NA
+  
   if (length(na.omit(end_labels$endpoint_quartile) <= 2) > 0) {
     end_labels[end_labels$endpoint_quartile <= 2, 'quartile_label_pos'] <- quartile_label_max
   }
