@@ -87,7 +87,7 @@ haid_plot <- function(
   require(data.table)
   require(scales)
   #thematic stuff
-  pointsize <- 2.5
+  pointsize <- 3
   segsize <- 1
   annotate_size <- 5
 
