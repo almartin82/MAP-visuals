@@ -5,7 +5,7 @@
 #'
 #' @details 
 #' This function builds and prints a bar graph with 4 bins per bar show MAP data
-#' binned by quartile (National Percentil Rank).  Bars are centered at 50th percentile 
+#' binned by quartile (National Percentile Rank).  Bars are centered at 50th percentile 
 #' horizonatally
 #' 
 #' @param .data the data frame in TEAM canoncical style (long data forms)
@@ -25,6 +25,8 @@
 #' @param facets = FALSE
 #' @param facet_opts = FALSE
 #' @param title_text = FALSE
+#' @param small_n_cutoff drop a grade_level_season if less than x% of the max? 
+#' (useful when dealing with weird cohort histories)
 #' 
 #' @return prints a ggplot object
 #' @export
@@ -42,12 +44,15 @@ becca_plot <- function(
   ,justify_widths = FALSE
   ,justify_min = NA
   ,justify_max = NA
-  ,entry_grades = c(-0.7, 4.3)
+  ,entry_grades = c(-0.8, 4.2)
   ,color_scheme = 'KIPP Report Card'
   ,facets = FALSE
   ,facet_opts = FALSE
-  ,title_text = FALSE) {
-  
+  ,title_text = FALSE
+  ,small_n_cutoff = .001
+  ) {
+  require(dplyr)
+    
   # Changed passed dataframes' column names to those used throughout 
   # function
   
@@ -56,7 +61,7 @@ becca_plot <- function(
   colnames(.data)[colnames(.data) == academic_year_column] <- 'MAP_YEAR_ACADEMIC'
   colnames(.data)[colnames(.data) == grade_level_season_column] <- 'GRADE_LEVEL_SEASON'
   colnames(.data)[colnames(.data) == measurement_scale_column] <- 'MEASUREMENTSCALE'
-  colnames(.data)[colnames(.data) == percentile_column] <- 'PERCENTILE_2011_NORMS'
+  colnames(.data)[colnames(.data) == percentile_column] <- 'PERCENTILE_2011_NORMS'  
 
   #TRANSFORMATION 1 - TRIM
   #trim down the C.data - we don't need all the columns
@@ -75,10 +80,20 @@ becca_plot <- function(
     #default is Fall K, Fall 5 (aka -0.7, 4.3) - only change if you need to 
     #add an additional entry grade (perhaps 9th?) or to take away 5th
     #(eg for a fully grown KIPP school?)
-    d1 <- d1[GRADE_LEVEL_SEASON %in% entry_grades | GRADE_LEVEL_SEASON %% 1 == 0]
+    d1[with(d1, round(GRADE_LEVEL_SEASON, 1) %in% round(entry_grades,1) | GRADE_LEVEL_SEASON %% 1 == 0), ]
   }
   
+  #drop small N time periods
+  by_grade_season <- group_by(.data, GRADE_LEVEL_SEASON)
+  grade_season_counts <- summarize(
+    by_grade_season
+   ,n=n()
+  )
+  biggest <- max(grade_season_counts$n)
+  grade_season_counts$include <- grade_season_counts$n >= small_n_cutoff * biggest
+  use_these <- grade_season_counts[grade_season_counts$include==TRUE, 'GRADE_LEVEL_SEASON']
   
+  d1 <- d1[d1$GRADE_LEVEL_SEASON %in% use_these, ]
   
   #calculate quartile from test percentile
   d1[,QUARTILE:=floor((PERCENTILE_2011_NORMS/25) + 1)]
