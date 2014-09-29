@@ -80,7 +80,7 @@ becca_plot <- function(
     #default is Fall K, Fall 5 (aka -0.7, 4.3) - only change if you need to 
     #add an additional entry grade (perhaps 9th?) or to take away 5th
     #(eg for a fully grown KIPP school?)
-    d1[with(d1, round(GRADE_LEVEL_SEASON, 1) %in% round(entry_grades,1) | GRADE_LEVEL_SEASON %% 1 == 0), ]
+    d1 <- d1[with(d1, round(GRADE_LEVEL_SEASON, 1) %in% round(entry_grades,1) | GRADE_LEVEL_SEASON %% 1 == 0), ]
   }
   
   #drop small N time periods
