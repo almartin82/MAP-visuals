@@ -11,6 +11,7 @@ Depends:
     grid,
     plyr,
     reshape,
-    gridExtra
+    gridExtra,
+    dplyr
 Imports:
     data.table

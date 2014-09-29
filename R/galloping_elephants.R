@@ -7,27 +7,57 @@
 #' @param first_and_spring_only should fall/winter scores be shown, or only endpoint scores?
 #' @param entry_grades the entry grades that are considered 'first' for a cohort (default is KF and 5F)
 #' @param title_text desired plot title
+#' @param ho_cutoff ``hold over cutoff'' (not currently implemented)
+#' @param bw_adjust adjustment for smoothness of density, passed to \code(\link[dply]{geom_density}) 
+#' @param school_name_column name of column in \code(.data) with school names or abbreviations
+#' @param academic_year_column name of column in \code(.data) with academic year
+#' @param grade_level_season] name of column in \code(.data) with grade-level-season code
+#' @param rit_score_column name of column in \code(.data) with RIT Score
+#' @param test_percentile_column name of column in \code(.data) with National Percentile Rank
+#' @param current_grade_column name of column in \code(.data) with current grade level
+#'
 #' 
 #' @return returns a ggplot object
 #' @export
-
 galloping_elephants <- function (
-  df
+  .data
  ,first_and_spring_only = TRUE
  ,entry_grades = c(-0.8, 4.2)
  ,title_text = FALSE
  ,ho_cutoff = 13
+ ,bw_adjust=1
+ ,school_name_column = 'sch_abbrev'
+ ,academic_year_column = 'map_year_academic'
+ ,grade_level_season = 'grade_level_season'
+ ,measurement_scale_column = 'measurementscale'
+ ,rit_score_column = 'testritscore'
+ ,test_percentile_column = 'percentile_2011_norms'
+ ,current_grade_column='cur_grade_level' 
 ) {
 
+  # rename df column names 
+  
+  colnames(.data)[colnames(.data) == school_name_column] <-'sch_abbrev'
+  colnames(.data)[colnames(.data) == academic_year_column]<-'map_year_academic'
+  colnames(.data)[colnames(.data) == grade_level_season]<-'grade_level_season'
+  colnames(.data)[colnames(.data) == measurement_scale_column]<-'measurementscale'
+  colnames(.data)[colnames(.data) == rit_score_column]<-'testritscore'
+  colnames(.data)[colnames(.data) == test_percentile_column]<-'percentile_2011_norms'
+  colnames(.data)[colnames(.data) == current_grade_column]<-'cur_grade_level' 
+  
+  # load school norms data
+  data(norms_2011_sparse, envir = environment()) #avoids side effect of load norms_dens into users workspace
+  
 #data transformations
-stage_1 <- df[,c(
- 'sch_abbrev'
-,'map_year_academic'
-,'grade_level_season'
-,'measurementscale'
-,'testritscore'
-,'percentile_2011_norms'
-,'cur_grade_level')]
+stage_1 <- .data %>% select(sch_abbrev
+                            ,map_year_academic
+                            ,grade_level_season
+                            ,measurementscale
+                            ,testritscore
+                            ,percentile_2011_norms
+                            ,cur_grade_level
+  )
+ 
 
 #kill holdover data
 stage_1 <- stage_1[stage_1$grade_level_season < ho_cutoff, ]
@@ -44,7 +74,7 @@ if (first_and_spring_only) {
                      stage_1$grade_level_season == (stage_1$cur_grade_level - 0.5),]
 }
  
-print(nrow(stage_1))
+#print(nrow(stage_1))
 stage_1$grade_season_label <- unlist(lapply(stage_1$grade_level_season, fall_spring_me))
 stage_1$label_sorter <- unlist(lapply(stage_1$grade_level_season, fall_spring_sort_me))
 
@@ -75,13 +105,14 @@ if (subj == 'Science - General Science') {
   subj <- 'General Science'
 }
 
-norms_slim <- norms[norms$MEASUREMENTSCALE == subj
-        & norms$RIT >= min(stage_1$testritscore)
-        & norms$RIT <= max(stage_1$testritscore)
-        #norms after 8th grade are stupid
-        & norms$GRADE_LEVEL <= 8, ]
+grades<-unique(stage_1$cur_grade_level)
 
-norms_slim$chart_label <- paste("nat'l Gr.", norms_slim$GRADE_LEVEL, 'mean')
+norms_slim <- norms_sparse %>% dplyr::filter(measurementscale == subj,
+                                            RIT >= min(stage_1$testritscore),
+                                            RIT <= max(stage_1$testritscore),
+                                            grade %in% grades) # norms after 8th grade are stupid
+                                            
+norms_slim$chart_label <- paste("Nat'l Gr.", norms_slim$grade, 'Spring Mean:', norms_slim$RIT)
 
 #dummy, to get height of density plot
 dummy <- ggplot(
@@ -91,7 +122,7 @@ dummy <- ggplot(
    ,group = grade_season_label
   )
 ) + 
-  geom_density(adjust = 0.8)
+  geom_density(adjust = bw_adjust)
 
 points <- ggplot_build(dummy)
   
@@ -125,8 +156,8 @@ p <- p + annotate(
  ,xend = norms_slim$RIT
  ,y = 0
  ,yend = 1
- ,color = 'gray20'
- ,alpha = .3
+ ,color = 'black'
+ ,alpha = 1
 )
 
 #annotation text (behind everything else)
@@ -135,8 +166,8 @@ p <- p + annotate(
  ,x = norms_slim$RIT
  ,y = .8 * max(max_points$y)
  ,label = norms_slim$chart_label
- ,color = 'gray20'
- ,alpha = .3
+ ,color = 'black'
+ ,alpha = 1 
  ,size = 3
  ,vjust = 1
  ,angle = 90
@@ -144,7 +175,7 @@ p <- p + annotate(
 
 p <- p +
 geom_density(
-  adjust = 0.8
+  adjust = bw_adjust
 ) + scale_alpha(
   range = c(0.5, 0.85)
 ) + theme(
