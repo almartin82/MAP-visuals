@@ -11,7 +11,6 @@
 #' @param .data the data frame in TEAM canoncical style (long data forms)
 #' @param school_name_column column in \code{.data} with school names
 #' @param cohort_name_column  column in \code{.data} with cohornt names
-#' @param academic_year_column column in \code{.data} with academic years
 #' @param grade_level_season_column column in \code{.data} with numeric indicating grade season (e.g., Fall 4th
 #' = 3.3, Winter 4th = 3.7, Spring 4th = 4.0).
 #' @param measurement_scale_column column in \code{.data} with subject
@@ -36,7 +35,6 @@ becca_plot <- function(
    #for munging data
   ,school_name_column = 'sch_abbr'
   ,cohort_name_column = 'cohort'
-  ,academic_year_column = 'map_year_academic'
   ,grade_level_season_column = 'grade_level_season'
   ,measurement_scale_column = 'measurementscale'
   ,percentile_column = 'percentile_2011_norms'
@@ -60,7 +58,6 @@ becca_plot <- function(
   
   colnames(.data)[colnames(.data) == school_name_column] <- 'SCH_ABBREV'
   colnames(.data)[colnames(.data) == cohort_name_column] <- 'COHORT'
-  colnames(.data)[colnames(.data) == academic_year_column] <- 'MAP_YEAR_ACADEMIC'
   colnames(.data)[colnames(.data) == grade_level_season_column] <- 'GRADE_LEVEL_SEASON'
   colnames(.data)[colnames(.data) == measurement_scale_column] <- 'MEASUREMENTSCALE'
   colnames(.data)[colnames(.data) == percentile_column] <- 'PERCENTILE_2011_NORMS'  
@@ -71,7 +68,6 @@ becca_plot <- function(
   d1 <- as.data.table(as.data.frame(.data[,c(
      'SCH_ABBREV'
     ,'COHORT'
-    ,'MAP_YEAR_ACADEMIC'
     ,'GRADE_LEVEL_SEASON'
     ,'MEASUREMENTSCALE'
     ,'PERCENTILE_2011_NORMS')]))
@@ -111,14 +107,12 @@ becca_plot <- function(
   d2<-d1[,list(N_Qrtl=.N), 
          keyby=list(SCH_ABBREV, 
                     COHORT,
-                    MAP_YEAR_ACADEMIC, 
                     GRADE_LEVEL_SEASON, 
                     MEASUREMENTSCALE, 
                     QUARTILE)][
                       d1[,list(.N), 
                          keyby=list(SCH_ABBREV, 
                                     COHORT,
-                                    MAP_YEAR_ACADEMIC, 
                                     GRADE_LEVEL_SEASON, 
                                     MEASUREMENTSCALE)]][,PCT:=round(N_Qrtl/N*100,1)]
 
@@ -151,7 +145,6 @@ becca_plot <- function(
   final_data <- copy(d2[order(MEASUREMENTSCALE, 
                          SCH_ABBREV, 
                          COHORT,
-                         MAP_YEAR_ACADEMIC, 
                          GRADE_LEVEL_SEASON,
                          ORDER)]) 
 
@@ -175,7 +168,6 @@ becca_plot <- function(
                                MIDPOINT=cumsum(PCT) - 0.5*PCT),
                          by=list(SCH_ABBREV, 
                                  COHORT, 
-                                 MAP_YEAR_ACADEMIC, 
                                  GRADE_LEVEL_SEASON, 
                                  MEASUREMENTSCALE)]
   #...and another for those below.
@@ -187,7 +179,6 @@ becca_plot <- function(
                                MIDPOINT=cumsum(PCT) - 0.5*PCT),
                          by=list(SCH_ABBREV, 
                                  COHORT, 
-                                 MAP_YEAR_ACADEMIC, 
                                  GRADE_LEVEL_SEASON, 
                                  MEASUREMENTSCALE)]
   
