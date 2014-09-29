@@ -128,7 +128,7 @@ becca_plot2.mapvizier <- function(.data, ...
     )
     
     rhs<-switch(rhs,
-                'SchoolIntials' =' SCH_ABBREV',
+                'SchoolInitials' =' SCH_ABBREV',
                 'CohortYear' = 'COHORT',
                 'Year2'  = 'MAP_YEAR_ACADEMIC',
                 'GradeLevelSeason' = 'GRADE_LEVEL_SEASON',
