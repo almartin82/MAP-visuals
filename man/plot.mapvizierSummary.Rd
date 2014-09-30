@@ -31,7 +31,7 @@
 
 \item{years}{integer vector with years of second test year in term names (i.e.,
 to plot results from SY2010-2011, SY 2011-2012, and SY 2012-2013, you should pass the
-vector \code(c(2011, 2012, 2013)) or \code(c(2011:2013))).}
+vector \code{c(2011, 2012, 2013)} or \code{c(2011:2013)}).}
 
 \item{metric}{character value indicating which MAP measurement to plot. Choices are:
 \itemize{
