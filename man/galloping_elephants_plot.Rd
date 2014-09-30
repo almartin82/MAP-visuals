@@ -14,7 +14,7 @@ galloping_elephants_plot(.data, ...)
 the \code{.data} argument (i.e. only containing subsetting arguments)}
 }
 \value{
-a \code{link[ggplot2]{ggplot2}} object
+a \code{\link[ggplot2]{ggplot2}} object
 }
 \description{
 \code{galloping_elephants_plot()} is a method that serves as wrapper for \code{\link{galloping_elephants}}.
