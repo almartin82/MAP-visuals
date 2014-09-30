@@ -33,7 +33,7 @@ galloping_elephants_plot <- function(.data, ...) UseMethod("galloping_elephants_
 #' @name galloping_elephants_plot.default
 #' @title Wrapper to galloping_elephants for non \code{\link{mapvizier}} objects
 #' @aliases galloping_elephants
-galloping_elephants.default <- function (.data
+galloping_elephants_plot.default <- function (.data
                                  ,first_and_spring_only = TRUE
                                  ,entry_grades = c(-0.8, 4.2)
                                  ,title_text = FALSE
