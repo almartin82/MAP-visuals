@@ -39,6 +39,7 @@ summary.mapvizier <- function(object, ..., digits=2){
   
   mapData<-group_by(as.data.frame(object$seasonMatched), 
                     SY.2, 
+                    CohortYear,
                     GrowthSeason, 
                     SchoolInitials, 
                     Grade.2, 

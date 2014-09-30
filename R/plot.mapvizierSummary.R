@@ -33,6 +33,9 @@
 #' \item "50th" = % Greater than\n50th Percentile, Season 2,
 #' \item "75th" = % Greater than\75th Percentile, Season 2.
 #' }
+#' @param by must be either "grade" or "cohort" indicating if you want metrics grouped by 
+#' grade-level (i.e., all 5th grade's over time) or by cohort (i.e., show class fo 2018's 
+#' performance over time.)
 #' 
 #' @return a \code{gglot2} object
 #' @rdname plot.mapvizierSummary
@@ -50,14 +53,28 @@ plot.mapvizierSummary <-  function(x,
                                               "General Science"),
                                    grades=c(2:8),
                                    years=NULL,
-                                   metric="Typical"){
+                                   metric="Typical",
+                                   by="grade"){
   require(ggplot2)
   x<-as.data.frame(x)
   plot_data <- filter(x, 
                       GrowthSeason == growthseason,
                       Subject %in% subjects,
                       Grade %in% grades
-  )
+  ) 
+  # Need to create label for cohorts that includes current grade (==max observed)
+  cohort_current_grade<-group_by(plot_data, 
+                                by=CohortYear) %>% 
+    dplyr::summarize(Grade=max(Grade)) %>% 
+    mutate(Class2=paste0(CohortYear, 
+                         "\n(Current grade: ", 
+                         Grade, ")")
+    ) %>%
+    select(CohortYear, Class2)
+  
+  plot_data<-left_join(plot_data, 
+                       cohort_current_grade, 
+                       by="CohortYear")
   
   if(!is.null(years)) {
     plot_data<-mutate(plot_data, Year2=
@@ -84,25 +101,49 @@ plot.mapvizierSummary <-  function(x,
                          "50th" = "% Greater than\n50th Percentile, Season 2" ,
                          "75th" = "% Greater than\75th Percentile, Season 2"
   )
-  
-  p.long<-ggplot(plot_data, 
-                 aes_string(x='gsub("20","",SY)', 
-                     y=y_call
-                 )
-  ) + 
-    geom_line(aes(group=School, color=School)) +
-    geom_point(color="white", size=8.75) +
-    geom_hline(aes(yintercept=80), color="lightgray") +
-    geom_text(aes_string(label=paste('paste(',y_call,',"%",sep="")'), 
-                  color="School"),
-              size=3) +
-    #scale_color_manual(values = c("#439539", "purple", "#60A2D7", "#C49A6C")) +
-    facet_grid(Subject~Grade) +
-    theme_bw() + 
-    theme(legend.position="bottom") +
-    xlab("School Year") +
-    ylab(y_axis_label)  
-  
+  if(by=="grade"){
+    p.long<-ggplot(plot_data, 
+                   aes_string(x='gsub("20","",SY)', 
+                              y=y_call
+                   )
+    ) + 
+      geom_line(aes(group=School, color=School)) +
+      geom_point(color="white", size=8.75) +
+      geom_hline(aes(yintercept=80), color="lightgray") +
+      geom_text(aes_string(label=paste('paste(',y_call,',"%",sep="")'), 
+                           color="School"),
+                size=3) +
+      #scale_color_manual(values = c("#439539", "purple", "#60A2D7", "#C49A6C")) +
+      facet_grid(Subject~Grade) +
+      theme_bw() + 
+      theme(legend.position="bottom") +
+      xlab("School Year") +
+      ylab(y_axis_label)  
+    
+  }
+  if(by=="cohort"){
+    
+    
+    p.long<-ggplot(plot_data, 
+                   aes_string(x='Grade', 
+                              y=y_call
+                   )
+    ) + 
+      geom_line(aes(group=School, color=School)) +
+      geom_point(color="white", size=8.75) +
+      geom_hline(aes(yintercept=80), color="lightgray") +
+      geom_text(aes_string(label=paste('paste(',y_call,',"%",sep="")'), 
+                           color="School"),
+                size=3) +
+      #scale_color_manual(values = c("#439539", "purple", "#60A2D7", "#C49A6C")) +
+      facet_grid(Subject~Class2) +
+      theme_bw() + 
+      theme(legend.position="bottom") +
+      xlab("Grade") +
+      ylab(y_axis_label)  
+    
+    
+  }
   # return
   p.long
 }
