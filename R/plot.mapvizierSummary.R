@@ -60,7 +60,8 @@ plot.mapvizierSummary <-  function(x,
   plot_data <- filter(x, 
                       GrowthSeason == growthseason,
                       Subject %in% subjects,
-                      Grade %in% grades
+                      Grade %in% grades,
+                      N>10
   ) 
   # Need to create label for cohorts that includes current grade (==max observed)
   cohort_current_grade<-group_by(plot_data, 
