@@ -32,6 +32,7 @@ galloping_elephants_plot <- function(.data, ...) UseMethod("galloping_elephants_
 #' @rdname galloping_elephants_plot.default
 #' @name galloping_elephants_plot.default
 #' @title Wrapper to galloping_elephants for non \code{\link{mapvizier}} objects
+#' @export
 galloping_elephants_plot.default <- function (.data
                                  ,first_and_spring_only = TRUE
                                  ,entry_grades = c(-0.8, 4.2)
@@ -66,6 +67,7 @@ galloping_elephants_plot.default <- function (.data
 #' @rdname galloping_elephants_plot.mapvizier
 #' @name galloping_elephants_plot.mapvizier
 #' @title Wrapper to galloping_elephants for \code{\link{mapvizier}} objects
+#' @export
 galloping_elephants_plot.mapvizier <- function(.data, ...
                                                ,subsetting=filter(CohortYear==2023, 
                                                                   MeasurementScale=="Reading", 

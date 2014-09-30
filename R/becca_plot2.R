@@ -33,6 +33,7 @@ becca_plot2 <- function(.data, ...) UseMethod("becca_plot2")
 #' @name becca_plot2.default
 #' @title Wrapper to becca_plot for non \code{\link{mapvizier}} objects
 #' @aliases beccaplot2
+#' @export
 becca_plot2.default <- function(.data
                                 ,school_name_column = 'sch_abbr'
                                 ,cohort_name_column = 'cohort'
@@ -73,6 +74,7 @@ becca_plot2.default <- function(.data
 #' @name becca_plot2.mapvizier
 #' @title Wrapper to becca_plot for \code{\link{mapvizier}} objects
 #' @aliases beccaplot2
+#' @export
 becca_plot2.mapvizier <- function(.data, ...
                                   #,first_and_spring_only = TRUE
                                   #,auto_justify_x = TRUE
