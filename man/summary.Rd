@@ -3,7 +3,7 @@
 \alias{summary.mapvizier}
 \title{summary method for \code{mapvizier} class}
 \usage{
-summary.mapvizier(object, ..., digits = 2)
+\method{summary}{mapvizier}(object, ..., digits = 2)
 }
 \arguments{
 \item{x}{a \code{mapvizier} object}
@@ -22,7 +22,7 @@ summarizes growth data from \code{mapvizier} orbect.
 Creates a \code{mapvizierSummary} object of growth data from a \code{mapvizier}
 object.  Includes the following summarizations for every growth term available
 in the \code{mapvizier} object:
-itemize{
+\itemize{
  \item number tested in both assessment seasons (i.e., the number of students who
  too a test in both assessment season and for which we are able to calcualate growth stats).
  \item Total students making typical growth
