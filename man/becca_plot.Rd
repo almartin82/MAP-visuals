@@ -4,14 +4,14 @@
 \title{Becca Vichniac's Quartile (Floating Bar) Chart}
 \usage{
 becca_plot(.data, school_name_column = "sch_abbr",
-  cohort_name_column = "cohort", academic_year_column = "map_year_academic",
+  cohort_name_column = "cohort",
   grade_level_season_column = "grade_level_season",
   measurement_scale_column = "measurementscale",
   percentile_column = "percentile_2011_norms", first_and_spring_only = TRUE,
-  auto_justify_x = TRUE, justify_widths = FALSE, justify_min = NA,
-  justify_max = NA, entry_grades = c(-0.7, 4.3),
+  entry_grades = c(-0.8, 4.2), auto_justify_x = TRUE,
+  justify_widths = FALSE, justify_min = NA, justify_max = NA,
   color_scheme = "KIPP Report Card", facets = FALSE, facet_opts = FALSE,
-  title_text = FALSE)
+  title_text = FALSE, small_n_cutoff = 0.001)
 }
 \arguments{
 \item{.data}{the data frame in TEAM canoncical style (long data forms)}
@@ -19,8 +19,6 @@ becca_plot(.data, school_name_column = "sch_abbr",
 \item{school_name_column}{column in \code{.data} with school names}
 
 \item{cohort_name_column}{column in \code{.data} with cohornt names}
-
-\item{academic_year_column}{column in \code{.data} with academic years}
 
 \item{grade_level_season_column}{column in \code{.data} with numeric indicating grade season (e.g., Fall 4th
 = 3.3, Winter 4th = 3.7, Spring 4th = 4.0).}
@@ -46,6 +44,9 @@ becca_plot(.data, school_name_column = "sch_abbr",
 \item{facet_opts}{= FALSE}
 
 \item{title_text}{= FALSE}
+
+\item{small_n_cutoff}{drop a grade_level_season if less than x% of the max?
+(useful when dealing with weird cohort histories)}
 }
 \value{
 prints a ggplot object
@@ -55,7 +56,7 @@ prints a ggplot object
 }
 \details{
 This function builds and prints a bar graph with 4 bins per bar show MAP data
-binned by quartile (National Percentil Rank).  Bars are centered at 50th percentile
+binned by quartile (National Percentile Rank).  Bars are centered at 50th percentile
 horizonatally
 }
 
