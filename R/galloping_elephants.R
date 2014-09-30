@@ -8,13 +8,13 @@
 #' @param entry_grades the entry grades that are considered 'first' for a cohort (default is KF and 5F)
 #' @param title_text desired plot title
 #' @param ho_cutoff ``hold over cutoff'' (not currently implemented)
-#' @param bw_adjust adjustment for smoothness of density, passed to \code(\link[dply]{geom_density}) 
-#' @param school_name_column name of column in \code(.data) with school names or abbreviations
-#' @param academic_year_column name of column in \code(.data) with academic year
-#' @param grade_level_season] name of column in \code(.data) with grade-level-season code
-#' @param rit_score_column name of column in \code(.data) with RIT Score
-#' @param test_percentile_column name of column in \code(.data) with National Percentile Rank
-#' @param current_grade_column name of column in \code(.data) with current grade level
+#' @param bw_adjust adjustment for smoothness of density, passed to \code{\link[dply]{geom_density}} 
+#' @param school_name_column name of column in \code{.data} with school names or abbreviations
+#' @param academic_year_column name of column in \code{.data} with academic year
+#' @param grade_level_season] name of column in \code{.data} with grade-level-season code
+#' @param rit_score_column name of column in \code{.data} with RIT Score
+#' @param test_percentile_column name of column in \code{.data} with National Percentile Rank
+#' @param current_grade_column name of column in \code{.data} with current grade level
 #'
 #' 
 #' @return returns a ggplot object

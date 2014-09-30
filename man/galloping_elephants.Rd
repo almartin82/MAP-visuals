@@ -24,19 +24,19 @@ galloping_elephants(.data, first_and_spring_only = TRUE,
 
 \item{ho_cutoff}{``hold over cutoff'' (not currently implemented)}
 
-\item{bw_adjust}{adjustment for smoothness of density, passed to \code(\link[dply]{geom_density})}
+\item{bw_adjust}{adjustment for smoothness of density, passed to \code{\link[dply]{geom_density}}}
 
-\item{school_name_column}{name of column in \code(.data) with school names or abbreviations}
+\item{school_name_column}{name of column in \code{.data} with school names or abbreviations}
 
-\item{academic_year_column}{name of column in \code(.data) with academic year}
+\item{academic_year_column}{name of column in \code{.data} with academic year}
 
-\item{grade_level_season]}{name of column in \code(.data) with grade-level-season code}
+\item{grade_level_season]}{name of column in \code{.data} with grade-level-season code}
 
-\item{rit_score_column}{name of column in \code(.data) with RIT Score}
+\item{rit_score_column}{name of column in \code{.data} with RIT Score}
 
-\item{test_percentile_column}{name of column in \code(.data) with National Percentile Rank}
+\item{test_percentile_column}{name of column in \code{.data} with National Percentile Rank}
 
-\item{current_grade_column}{name of column in \code(.data) with current grade level}
+\item{current_grade_column}{name of column in \code{.data} with current grade level}
 }
 \value{
 returns a ggplot object

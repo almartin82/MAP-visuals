@@ -25,7 +25,7 @@
 #' @param grades integer vector to subset grades by (NB: Kindergarten should be denoted 0)
 #' @param years integer vector with years of second test year in term names (i.e., 
 #' to plot results from SY2010-2011, SY 2011-2012, and SY 2012-2013, you should pass the 
-#' vector \code(c(2011, 2012, 2013)) or \code(c(2011:2013))).
+#' vector \code{c(2011, 2012, 2013)} or \code{c(2011:2013)}).
 #' @param metric character value indicating which MAP measurement to plot. Choices are:
 #' \itemize{
 #' \item "Typical": % Meets/Exceeds\nTypical Growth,
