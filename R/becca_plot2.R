@@ -40,7 +40,7 @@ becca_plot2.default <- function(.data
                                 ,academic_year_column = 'map_year_academic'
                                 ,grade_level_season_column = 'grade_level_season'
                                 ,measurement_scale_column = 'measurementscale'
-                                ,percentile_column = 'percentile_2011_norms'
+                                ,test_percentile_column = 'percentile_2011_norms'
                                 ,first_and_spring_only = TRUE
                                 ,auto_justify_x = TRUE
                                 ,justify_widths = FALSE
@@ -57,7 +57,7 @@ becca_plot2.default <- function(.data
              ,academic_year_column
              ,grade_level_season_column
              ,measurement_scale_column
-             ,percentile_column
+             ,test_percentile_column
              ,first_and_spring_only
              ,auto_justify_x
              ,justify_widths
@@ -146,7 +146,7 @@ becca_plot2.mapvizier <- function(.data, ...
     func_args$academic_year_column <- 'Year2'
     func_args$grade_level_season_column <- 'GradeLevelSeason'
     func_args$measurement_scale_column <- 'MeasurementScale'
-    func_args$percentile_column <- 'TestPercentile'
+    func_args$test_percentile_column <- 'TestPercentile'
     
     # Use do call to pass becca_plot() its arguments in a function
     
@@ -159,7 +159,7 @@ becca_plot2.mapvizier <- function(.data, ...
                   ,academic_year_column = 'Year2'
                   ,grade_level_season_column = 'GradeLevelSeason'
                   ,measurement_scale_column = 'MeasurementScale'
-                  ,percentile_column = 'TestPercentile'
+                  ,test_percentile_column = 'TestPercentile'
                   ,...
     )
   }

@@ -37,7 +37,7 @@ becca_plot <- function(
   ,cohort_name_column = 'cohort'
   ,grade_level_season_column = 'grade_level_season'
   ,measurement_scale_column = 'measurementscale'
-  ,percentile_column = 'percentile_2011_norms'
+  ,test_percentile_column = 'percentile_2011_norms'
    #controls if 'extra' data points (fall, winter) get dropped
   ,first_and_spring_only = TRUE
   ,entry_grades = c(-0.8, 4.2)
