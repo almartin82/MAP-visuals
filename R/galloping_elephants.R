@@ -108,8 +108,9 @@ norms_slim <- norms_sparse %>% dplyr::filter(measurementscale == subj,
                                             RIT >= min(stage_1$testritscore),
                                             RIT <= max(stage_1$testritscore),
                                             grade <= grades) # norms after 8th grade are stupid
-                                            
-norms_slim$chart_label <- paste("Nat'l Gr.", norms_slim$grade, 'Spring Mean:', norms_slim$RIT)
+if (nrow(norms_slim) > 0) {
+  norms_slim$chart_label <- paste("Nat'l Gr.", norms_slim$grade, 'Spring Mean:', norms_slim$RIT)  
+}
 
 #dummy, to get height of density plot
 dummy <- ggplot(
@@ -146,29 +147,31 @@ geom_point(
  ,alpha = 0
 )
   
-#annotation lines (behind everything else)
-p <- p + annotate(
-  geom = 'segment'
- ,x = norms_slim$RIT
- ,xend = norms_slim$RIT
- ,y = 0
- ,yend = 1
- ,color = 'black'
- ,alpha = 1
-)
+if (nrow(norms_slim) > 0) {
+  #annotation lines (behind everything else)
+  p <- p + annotate(
+    geom = 'segment'
+   ,x = norms_slim$RIT
+   ,xend = norms_slim$RIT
+   ,y = 0
+   ,yend = 1
+   ,color = 'black'
+   ,alpha = 1
+  )
 
-#annotation text (behind everything else)
-p <- p + annotate(
-  geom = 'text'
- ,x = norms_slim$RIT
- ,y = .8 * max(max_points$y)
- ,label = norms_slim$chart_label
- ,color = 'black'
- ,alpha = 1 
- ,size = 3
- ,vjust = 1
- ,angle = 90
-)
+  #annotation text (behind everything else)
+  p <- p + annotate(
+    geom = 'text'
+   ,x = norms_slim$RIT
+   ,y = .8 * max(max_points$y)
+   ,label = norms_slim$chart_label
+   ,color = 'black'
+   ,alpha = 1 
+   ,size = 3
+   ,vjust = 1
+   ,angle = 90
+  )
+}
 
 p <- p +
 geom_density(
