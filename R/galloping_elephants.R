@@ -30,7 +30,7 @@ galloping_elephants <- function (
  ,grade_level_season = 'grade_level_season'
  ,measurement_scale_column = 'measurementscale'
  ,rit_score_column = 'testritscore'
- ,test_percentile_column = 'percentile_2011_norms'
+ ,test_percentile_column = 'testpercentile'
  ,current_grade_column='cur_grade_level' 
 ) {
 
@@ -40,7 +40,7 @@ galloping_elephants <- function (
   colnames(.data)[colnames(.data) == grade_level_season]<-'grade_level_season'
   colnames(.data)[colnames(.data) == measurement_scale_column]<-'measurementscale'
   colnames(.data)[colnames(.data) == rit_score_column]<-'testritscore'
-  colnames(.data)[colnames(.data) == test_percentile_column]<-'percentile_2011_norms'
+  colnames(.data)[colnames(.data) == test_percentile_column]<-'testpercentile'
   colnames(.data)[colnames(.data) == current_grade_column]<-'cur_grade_level' 
   
   # load school norms data
@@ -51,7 +51,7 @@ stage_1 <- .data %>% select(sch_abbrev
                             ,grade_level_season
                             ,measurementscale
                             ,testritscore
-                            ,percentile_2011_norms
+                            ,testpercentile
                             ,cur_grade_level
   )
  
@@ -102,12 +102,12 @@ if (subj == 'Science - General Science') {
   subj <- 'General Science'
 }
 
-grades<-unique(stage_1$cur_grade_level)
+grades <- unique(stage_1$cur_grade_level)
 
 norms_slim <- norms_sparse %>% dplyr::filter(measurementscale == subj,
                                             RIT >= min(stage_1$testritscore),
                                             RIT <= max(stage_1$testritscore),
-                                            grade %in% grades) # norms after 8th grade are stupid
+                                            grade <= grades) # norms after 8th grade are stupid
                                             
 norms_slim$chart_label <- paste("Nat'l Gr.", norms_slim$grade, 'Spring Mean:', norms_slim$RIT)
 
