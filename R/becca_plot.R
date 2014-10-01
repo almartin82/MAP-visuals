@@ -60,7 +60,7 @@ becca_plot <- function(
   colnames(.data)[colnames(.data) == cohort_name_column] <- 'COHORT'
   colnames(.data)[colnames(.data) == grade_level_season_column] <- 'GRADE_LEVEL_SEASON'
   colnames(.data)[colnames(.data) == measurement_scale_column] <- 'MEASUREMENTSCALE'
-  colnames(.data)[colnames(.data) == percentile_column] <- 'PERCENTILE_2011_NORMS'  
+  colnames(.data)[colnames(.data) == test_percentile_column] <- 'PERCENTILE_2011_NORMS'  
 
   #TRANSFORMATION 1 - TRIM
   #trim down the C.data - we don't need all the columns
