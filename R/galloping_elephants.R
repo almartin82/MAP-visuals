@@ -27,7 +27,6 @@ galloping_elephants <- function (
  ,ho_cutoff = 13
  ,bw_adjust=1
  ,school_name_column = 'sch_abbrev'
- ,academic_year_column = 'map_year_academic'
  ,grade_level_season = 'grade_level_season'
  ,measurement_scale_column = 'measurementscale'
  ,rit_score_column = 'testritscore'
@@ -38,7 +37,6 @@ galloping_elephants <- function (
   # rename df column names 
   
   colnames(.data)[colnames(.data) == school_name_column] <-'sch_abbrev'
-  colnames(.data)[colnames(.data) == academic_year_column]<-'map_year_academic'
   colnames(.data)[colnames(.data) == grade_level_season]<-'grade_level_season'
   colnames(.data)[colnames(.data) == measurement_scale_column]<-'measurementscale'
   colnames(.data)[colnames(.data) == rit_score_column]<-'testritscore'
@@ -50,7 +48,6 @@ galloping_elephants <- function (
   
 #data transformations
 stage_1 <- .data %>% select(sch_abbrev
-                            ,map_year_academic
                             ,grade_level_season
                             ,measurementscale
                             ,testritscore
