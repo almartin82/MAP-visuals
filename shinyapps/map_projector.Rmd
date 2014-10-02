@@ -8,7 +8,7 @@ runtime: shiny
 ####What is this
 __MAP Projector__ uses NWEA's published norm tables to perform an [Markov Process](http://en.wikipedia.org/wiki/Markov_process) simulation of 5,000 potential student trajectories from the RIT scores achieved in the lowest observed grade for the selected subject. (Note: the simulation assumes a fall start date, but not every student's first test event occurs in the fall; the result is that some simulations start too early.  I'll fix that eventually).
 
-You can choose to highlight all simulated paths that end at a given score (say the 75th percentile in an exiting grade), as well as to plot the average path through all the simulated data and through all the highlighted simulations.  You notice that a posterior probability of achieving as score at least as teh _highlight cut score_ is given above the visualization.
+You can choose to highlight all simulated paths that end at a given score (say the 75th percentile in an exiting grade), as well as to plot the average path through all the simulated data and through all the highlighted simulations.  You'll notice that a posterior probability of achieving as score at least as the high as the  _highlight cut score_ is given above the visualization.
 
 
 The projected aveage pathes are a simply linear model that fits $y_{s,t} + \log(t) + \epsilon_{s,t}$, where $y_{s,t}$ is a simulated RIT score for sample $s$ at time $t$---an indicator of when a simulated assessment occured and the $\epsilon_{s,t} \sim N(0,1)$ are random errors.
