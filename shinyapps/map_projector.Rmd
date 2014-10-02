@@ -1,0 +1,244 @@
+---
+title: "MAP Projector"
+author: "Chris Haid"
+date: "October 1, 2014"
+output: html_document
+runtime: shiny
+---
+
+## [Create something today, even if it sucks!](http://themakeryproject.com/wp-content/uploads/2013/05/witandwhistlefathersday_mothersday_cards_2013_6.jpg)
+### Or, how to quickly develop an application to show simulated versus acutal outcomes while highlighting where we'd really like your students to be.
+
+#### How this works.
+
+1. Pick a measurement Scale (i.e., a subject to lay people).
+2. Pick a student.  Notice how nicely we've plotted their progress to day in that subject.  Neat.
+3. Select at which grade you'd like simulated data to end.  10th is a good grade, I'd keep it there.
+4. Check the __Show Simulated Data__, be patient,  and _have your mind blown!_
+5. Check __Highligh highs__, be patient, again and *__have your mind blown, again!!__*
+6. Fiddle with __Highlight simulated scores at or above:__ or the student or subject.
+7. Check out the simulated data in the cool, sortable table below.
+8. Now grab yourself a beer.  Think about the possibilities!
+
+```{r data_prep, echo=FALSE, message=FALSE, warning=FALSE}
+
+# In this chunk we load our packages, data, and do some munging.
+
+# Amazingly, you need only load two packages to makes this bad boy go. 
+require(mapvisuals)
+require(lubridate)
+
+
+#load fake MAP Data
+data(nweamap)
+
+# Vectorize mapvizier::grade_level_season
+gls<-function(x){
+  out<-as.vector(mapply(grade_level_season, x, SIMPLIFY=TRUE))
+  out
+}
+
+# subest for brevity's sake
+subjects<-c("Mathematics", "Reading")
+
+map_results<-nweamap %>% 
+  filter(MeasurementScale %in% subjects, 
+         year(mdy(nweamap$TestStartDate)) >= 2010,
+         Grade>=5
+         ) %>% mapvizier
+
+
+
+students<-map_results$mapData %>% 
+  select(StudentID, StudentLastname, StudentFirstname, Grade) %>%
+  group_by(StudentID, StudentLastname, StudentFirstname) %>%
+  summarize(CurrentGrade=max(Grade)) %>% 
+  mutate(StudentName=paste(StudentLastname, StudentFirstname, sep=", ")) %>%
+  ungroup %>%
+  select(StudentName, StudentID)
+
+stus<-unlist(with(students, split(as.character(StudentID), StudentName)))
+```
+
+#### Inputs
+```{r inputs, echo=FALSE, messages=FALSE, warnings=FALSE}
+
+# This chunk builds up the input panel.  The call to inputPanel() will creat the silverish
+# panel that includes all the input types (in this case, select dropdowns, checkboxes, and a numeric input)
+# The corresponding input function (selectInput(), checkboxInput(), numericInput()) save the selected/inputed
+# values to an object called input and accessed (via input$inputID) in any of the reacitive functions below 
+# used to subset data, generate simulations, and and (re)generate plots 
+
+
+
+inputPanel(
+  selectInput("ms", label = "Select Measurement Scale",
+              choices = subjects, selected = "Reading"),
+  
+  selectInput("student", label = "Select Student:",
+               choices = stus),
+  
+  selectInput("end_grade", label = "Select Simulation End Grade",
+               choices = c(8:10), selected=10)
+  )
+inputPanel(
+  checkboxInput("sim_yes", label = "Show Simulated Data",
+                value=FALSE),
+  
+  numericInput(inputId = "ontrack_rit", 
+               value=250,
+               label = "Highlight simulated scores at or above:",
+               min = 195, max=300, step=10)
+)
+inputPanel(
+  checkboxInput("hl_yes", label = "Highlight highs",
+                value=FALSE),  
+
+  checkboxInput("avg_path_yes", label = "Show average path",
+                value=FALSE),
+  
+  checkboxInput("hl_path_yes", label = "Show average highlighted path",
+                value=FALSE)
+
+)
+
+
+```
+
+
+```{r reactive_date, echo=FALSE, messages=FALSE, warnings=FALSE}
+
+# This chunk contains all "reactive" elements that aren't directly pasted to a renderX function:  data, 
+# variables, and the simulation itself.  Each of these objects is a reactive function: these functions watch 
+# the inputs that will change their value say by sugsetting the data by choosing a student or a measurement 
+# scale.
+
+#Subset map data by sutdent, and subject, add a grade_level_season measure
+plot_data <- reactive({
+  plot_data <- map_results$mapData %>% 
+    filter(StudentID==as.integer(input$student), 
+    MeasurementScale==input$ms) %>%
+    mutate(GradeSeason=Grade + gls(Season))
+  plot_data 
+})
+
+#Get minimum grade from plot_data to start simulation
+start_grade <- reactive({
+    min(plot_data()$Grade)
+})
+
+#Get starting rit form minimum data in map data. used to starting simulation 
+start_rit <- reactive({
+    start_rit<-dplyr::filter(plot_data(), Grade==min(Grade), 
+                             mdy(TestStartDate)==min(mdy(TestStartDate)))
+    start_rit$TestRITScore
+})
+
+#This runs the simulation with mapvizier::norm_sim().  Notice it receives two reactive values (start_grade()
+# and start_rit(), since these are used both here in in the plot) as well as two input values (input$ms and 
+# input$end_grade)
+sim<-reactive({
+  
+  sim<-norm_sim(start.grade=start_grade(), 
+                start.subject = input$ms,
+                end.grade = input$end_grade,
+                start.rit = start_rit()
+                )
+  
+   sim<-sim %>% 
+    data.frame %>% 
+    mutate(Season=ifelse(Season==41,"Fall","Winter"),
+           GradeSeason=StartGrade+gls(Season),
+           TestRITScore=StartRIT)
+  
+    select_vars(names(sim), TestRITScore=StartRIT)
+  
+  sim_high <- filter(sim, GradeSeason==max(GradeSeason)) %>% 
+    mutate(High=TestRITScore>=input$ontrack_rit) %>%
+    select(ID, High)
+  
+  sim <- sim %>% left_join(sim_high, by="ID")
+  sim
+})
+
+proby <- reactive({
+  proby <- filter(sim(), GradeSeason==max(GradeSeason)) %>% data.frame %>%
+    dplyr::summarize(N=n(), Pr=round(sum(High)/N*100,2))
+  proby
+})
+
+```
+
+#### Visualization
+```{r visualization, echo=FALSE, messages=FALSE, warnings=FALSE}
+
+# This chunk renders the ggplot-based visualization. It adds the simuluated paths and highlighted paths
+# via the checkboxInputs above (input$sim_yes and input$hl_yes) as well as the reactive functions sim() and 
+# plot_data()
+
+
+renderText({paste0("Simluated probability that student achieves score higher than ", 
+                   input$ontrack_rit, 
+                   " in highest grade is ", 
+                   proby()$Pr, 
+                   "%")})
+
+renderPlot({
+  
+  # initials ggplot call using plot_data() reactive function
+  p<-ggplot(plot_data(), aes(x=GradeSeason, y=TestRITScore))
+  
+  if(input$sim_yes){ # show simulated futures
+    p<-  p + geom_line(data=sim(), 
+              aes(x=GradeSeason, y=TestRITScore, group=ID), 
+              color='gray',
+              alpha=.05) 
+  } 
+  if(input$hl_yes){ # highlight those futues that end at end_grade and exceed ontrack_rit value 
+    p <-  p + geom_line(data=filter(sim(), High==TRUE), 
+              aes(x=GradeSeason, y=TestRITScore, group=ID), 
+              color='lightgreen',
+              alpha=.3) 
+  } 
+  if(input$avg_path_yes){
+    p <- p + stat_smooth(data=sim(), method=lm, formula=y~log(x), color="#8D8865")
+  }
+  if(input$hl_path_yes){
+    p <- p + stat_smooth(data=filter(sim(), High==TRUE), method=lm, formula=y~log(x), color="#439539")
+  }
+#plot selected students history
+p <- p + 
+  geom_line(color='blue') +
+  theme_bw() + 
+  ylab("RIT Score") +
+  xlab("Grade") 
+  
+p
+    
+})
+
+```
+```{r datatable, echo=FALSE}
+tabsetPanel(
+  tabPanel("Simulated Data",
+    # This is simply a JavaScript based sortable, searchable, filterable DataTable using the data returned by
+    # the sim() reactive function.
+    renderDataTable({
+      sim()
+      })
+    ),
+    tabPanel("Student Data",
+             renderDataTable({
+               plot_data()
+               })
+             )
+  )
+
+
+
+
+```
+
+
+
+
