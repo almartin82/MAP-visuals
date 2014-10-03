@@ -6,12 +6,12 @@ output: html_document
 runtime: shiny
 ---
 ####What is this
-__MAP Projector__ uses NWEA's published norm tables to perform an [Markov Process](http://en.wikipedia.org/wiki/Markov_process) simulation of 5,000 potential student trajectories from the RIT scores achieved in the lowest observed grade for the selected subject. (Note: the simulation assumes a fall start date, but not every student's first test event occurs in the fall; the result is that some simulations start too early.  I'll fix that eventually).
+__MAP Projector__ uses NWEA's publised norm tables---the [2011 RIT Scale Norms Study Data Files](http://support.nwea.org/node/11789)---to perform a [Markov Process](http://en.wikipedia.org/wiki/Markov_process) simulation of 5,000 potential student trajectories from the RIT scores achieved in the lowest observed grade for the selected subject. (Note: the simulation assumes a fall start date, but not every student's first test event occurs in the fall; the result is that some simulations start too early.  I'll fix that eventually).
 
-You can choose to highlight all simulated paths that end at a given score (say the 75th percentile in an exiting grade), as well as to plot the average path through all the simulated data and through all the highlighted simulations.  You'll notice that a posterior probability of achieving as score at least as the high as the  _highlight cut score_ is given above the visualization.
+You can choose to highlight all simulated paths that end at a given score (say the 75th percentile) in an exiting grade; You can also plot the average path through all the simulated data and through all the highlighted simulations.  You'll notice that a posterior probability of achieving as score at least as the high as the  _highlight cut score_ is given above the visualization.
 
 
-The projected aveage pathes are a simply linear model that fits $y_{s,t} + \log(t) + \epsilon_{s,t}$, where $y_{s,t}$ is a simulated RIT score for sample $s$ at time $t$---an indicator of when a simulated assessment occured and the $\epsilon_{s,t} \sim N(0,1)$ are random errors.
+The projected average paths are a simple linear model that fits $y_{s,t} = \alpha +  \beta\times\log(t) + \epsilon_{s,t}$, where $y_{s,t}$ is a simulated RIT score for sample $s$ at time $t$---an indicator of when a simulated assessment occured and the $\epsilon_{s,t} \sim N(0,1)$ are random errors.
 ```{r data_prep, echo=FALSE, message=FALSE, warning=FALSE}
 
 # In this chunk we load our packages, data, and do some munging.
@@ -186,35 +186,58 @@ renderText({paste0("Simluated probability that student achieves score higher tha
 
 renderPlot({
   
-  # initials ggplot call using plot_data() reactive function
-  p<-ggplot(plot_data(), aes(x=GradeSeason, y=TestRITScore))
+  # initiats ggplot call using plot_data() reactive function
+  withProgress(message="Drawing graph", value=0.1, {
+    p<-ggplot(plot_data(), aes(x=GradeSeason, y=TestRITScore))
+    incProgress(.2, detail="Initiating plot with student data")
   
   if("sim_yes"%in% input$overlays){ # show simulated futures
+    incProgress(.4, detail="Drawing simulated data.")
+    
     p<-  p + geom_line(data=sim(), 
               aes(x=GradeSeason, y=TestRITScore, group=ID), 
               color='gray',
-              alpha=.05) 
+              alpha=.025) 
   } 
-  if("hl_yes" %in% input$overlays){ # highlight those futues that end at end_grade and exceed ontrack_rit value 
+  if("hl_yes" %in% input$overlays){ # highlight those futues that end at end_grade and exceed ontrack_rit
+    incProgress(.1, detail=paste("Highlighting paths exceeding", 
+                                  input$ontrack_rit, 
+                                  "by grade", input$end_grade))
+    
     p <-  p + geom_line(data=filter(sim(), High==TRUE), 
               aes(x=GradeSeason, y=TestRITScore, group=ID), 
               color='lightgreen',
-              alpha=.3) 
+              alpha=.05) 
   } 
   if("avg_path_yes" %in% input$overlays){
+    
+    incProgress(.1, detail="Calculating and adding average path.")
+    
     p <- p + stat_smooth(data=sim(), method=lm, formula=y~log(x), color="#8D8865")
   }
   if("hl_path_yes" %in% input$overlays){
+    incProgress(.05, detail="Calculating and adding average highlighted path.")
     p <- p + stat_smooth(data=filter(sim(), High==TRUE), method=lm, formula=y~log(x), color="#439539")
   }
 #plot selected students history
-p <- p + 
-  geom_line(color='blue') +
-  theme_bw() + 
-  ylab("RIT Score") +
-  xlab("Grade") 
   
-p
+ 
+  
+p <- p + 
+    geom_line(color='blue') +
+    theme_bw() + 
+    ylab("RIT Score") +
+    xlab("Grade") 
+  
+  
+  print(p)
+
+  setProgress(.95, detail="drawing all elements")
+  setProgress(1)
+
+
+    
+  })  
     
 })
 
