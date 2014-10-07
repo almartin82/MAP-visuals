@@ -8,11 +8,11 @@
   cohort_name_column = "cohort", academic_year_column = "map_year_academic",
   grade_level_season_column = "grade_level_season",
   measurement_scale_column = "measurementscale",
-  percentile_column = "percentile_2011_norms", first_and_spring_only = TRUE,
-  auto_justify_x = TRUE, justify_widths = FALSE, justify_min = NA,
-  justify_max = NA, entry_grades = c(-0.7, 4.3),
-  color_scheme = "KIPP Report Card", facets = FALSE, facet_opts = FALSE,
-  title_text = FALSE)
+  test_percentile_column = "percentile_2011_norms",
+  first_and_spring_only = TRUE, auto_justify_x = TRUE,
+  justify_widths = FALSE, justify_min = NA, justify_max = NA,
+  entry_grades = c(-0.7, 4.3), color_scheme = "KIPP Report Card",
+  facets = FALSE, facet_opts = FALSE, title_text = FALSE)
 }
 \description{
 Wrapper to becca_plot for non \code{\link{mapvizier}} objects
