@@ -6,11 +6,10 @@
 galloping_elephants(.data, first_and_spring_only = TRUE,
   entry_grades = c(-0.8, 4.2), title_text = FALSE, ho_cutoff = 13,
   bw_adjust = 1, school_name_column = "sch_abbrev",
-  academic_year_column = "map_year_academic",
   grade_level_season = "grade_level_season",
   measurement_scale_column = "measurementscale",
   rit_score_column = "testritscore",
-  test_percentile_column = "percentile_2011_norms",
+  test_percentile_column = "testpercentile",
   current_grade_column = "cur_grade_level")
 }
 \arguments{
