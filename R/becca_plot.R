@@ -14,7 +14,7 @@
 #' @param grade_level_season_column column in \code{.data} with numeric indicating grade season (e.g., Fall 4th
 #' = 3.3, Winter 4th = 3.7, Spring 4th = 4.0).
 #' @param measurement_scale_column column in \code{.data} with subject
-#' @param percentile_column = column in \code{.data} with NPR.
+#' @param test_percentile_column = column in \code{.data} with NPR.
 #' @param first_and_spring_only indicator for showing shoing Fall-to-Spring rather than Spring-to-Spring
 #' @param justify_widths width justification indicator
 #' @param justify_min 
@@ -83,7 +83,7 @@ becca_plot <- function(
   
   #drop small N time periods
   by_grade_season <- group_by(.data, GRADE_LEVEL_SEASON)
-  grade_season_counts <- summarize(
+  grade_season_counts <- dplyr::summarize(
     by_grade_season
    ,n=n()
   )

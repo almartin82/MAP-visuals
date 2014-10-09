@@ -25,7 +25,7 @@ becca_plot(.data, school_name_column = "sch_abbr",
 
 \item{measurement_scale_column}{column in \code{.data} with subject}
 
-\item{percentile_column}{= column in \code{.data} with NPR.}
+\item{test_percentile_column}{= column in \code{.data} with NPR.}
 
 \item{first_and_spring_only}{indicator for showing shoing Fall-to-Spring rather than Spring-to-Spring}
 
