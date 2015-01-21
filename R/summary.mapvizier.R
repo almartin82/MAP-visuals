@@ -6,7 +6,7 @@
 #' @details Creates a \code{mapvizierSummary} object of growth data from a \code{mapvizier} 
 #' object.  Includes the following summarizations for every growth term available
 #' in the \code{mapvizier} object:
-#' itemize{
+#' \itemize{
 #'  \item number tested in both assessment seasons (i.e., the number of students who 
 #'  too a test in both assessment season and for which we are able to calcualate growth stats).
 #'  \item Total students making typical growth
@@ -39,6 +39,7 @@ summary.mapvizier <- function(object, ..., digits=2){
   
   mapData<-group_by(as.data.frame(object$seasonMatched), 
                     SY.2, 
+                    CohortYear,
                     GrowthSeason, 
                     SchoolInitials, 
                     Grade.2, 

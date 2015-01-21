@@ -16,6 +16,12 @@ fall_spring_me <- function(grade_level) {
     return('KW')
   } else if(grade_level == 0) {
     return('KS')
+  #too small, return nothing
+  } else if(grade_level <= -1) {
+    return('')
+  #too big
+  } else if(grade_level > 12) {
+    return('')  
   #S observations are decimal 0s
   } else if(grade_level %% 1 == 0) {
     return(paste0(round(grade_level, 0), 'S'))

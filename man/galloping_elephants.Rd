@@ -3,8 +3,14 @@
 \alias{galloping_elephants}
 \title{RIT distribution change (affectionately titled 'Galloping Elephants')}
 \usage{
-galloping_elephants(df, first_and_spring_only = TRUE, entry_grades = c(-0.7,
-  4.3), title_text = FALSE)
+galloping_elephants(.data, first_and_spring_only = TRUE,
+  entry_grades = c(-0.8, 4.2), title_text = FALSE, ho_cutoff = 13,
+  bw_adjust = 1, school_name_column = "sch_abbrev",
+  grade_level_season = "grade_level_season",
+  measurement_scale_column = "measurementscale",
+  rit_score_column = "testritscore",
+  test_percentile_column = "testpercentile",
+  current_grade_column = "cur_grade_level")
 }
 \arguments{
 \item{df}{long data frame in TEAM canonical style}
@@ -14,6 +20,22 @@ galloping_elephants(df, first_and_spring_only = TRUE, entry_grades = c(-0.7,
 \item{entry_grades}{the entry grades that are considered 'first' for a cohort (default is KF and 5F)}
 
 \item{title_text}{desired plot title}
+
+\item{ho_cutoff}{``hold over cutoff'' (not currently implemented)}
+
+\item{bw_adjust}{adjustment for smoothness of density, passed to \code{\link[dply]{geom_density}}}
+
+\item{school_name_column}{name of column in \code{.data} with school names or abbreviations}
+
+\item{academic_year_column}{name of column in \code{.data} with academic year}
+
+\item{grade_level_season]}{name of column in \code{.data} with grade-level-season code}
+
+\item{rit_score_column}{name of column in \code{.data} with RIT Score}
+
+\item{test_percentile_column}{name of column in \code{.data} with National Percentile Rank}
+
+\item{current_grade_column}{name of column in \code{.data} with current grade level}
 }
 \value{
 returns a ggplot object

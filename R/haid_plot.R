@@ -87,61 +87,117 @@ haid_plot <- function(
   require(data.table)
   require(scales)
   #thematic stuff
-  pointsize <- 2.5
+  pointsize <- 3
   segsize <- 1
   annotate_size <- 5
 
   # Check to see if object passed in is a mapvizier object
   if(inherits(df, "mapvizier")){
     arg<-dots(...)
-    # extract seasonMatched as data.frame and filter passed via ...
-    df<-as.data.frame(df$seasonMatched) %>% 
+    # extract seasonMatched (or mapData if nrow(seasonMatched==0) 
+    # as data.frame and filter passed via ...
+    if(nrow(df$seasonMatched)==0){ 
+      
+      single_season_flag <- TRUE
+      df<-as.data.frame(df$mapData) %>%
+        filter(...) %>%
+        mutate(student_name=paste(StudentFirstname, StudentLastname),
+               growth_status="Positive",
+               name_status=TestQuartile)
+      
+      df<-calc_growth_targets(df,
+                              season1="Spring",
+                              season2="Spring")
+      #season names
+      start_season_abbrev <-unique(df$Season)  
+      end_season_abbrev <-unique(df$Season) 
+      
+      p_arrow_tiers <- c("Positive", "Typical", "College Ready", "Negative")
+      
+      #set default settings if not provided 
+      if(missing(p_arrow_colors)) p_arrow_colors <- c("tan4", "snow4", "gold", "red")
+      if(missing(p_name_colors)) p_name_colors <- c("#f3716b", "#79ac41", "#1ebdc2", "#a57eb8")
+      if(missing(p_name_color_tiers)) p_name_color_tiers<-c("1","2","3","4")
+      
+      
+      #copy the sort column to a new column
+      df$sort_column <- df[ , "TestRITScore"]
+      #data transformations
+      #haid plot is self-munging!
+      #the theory here is that it is easier to work inside of ggplot's calling environment
+      #IF YOU KNOW WHAT THINGS ARE CALLED.  so let's have the user pass a series of identifiers
+      #that indicate which column in their df has key data.  then we'll rename the headers of
+      #the passed df so that our transformations and ggplot calls can be as simple as possible. 
+      
+      #colnames(df)[colnames(df) == student_col_name] <- 'student_name'
+      #RIT
+      colnames(df)[colnames(df) == "TestRITScore"] <- 'base_rit'
+      #colnames(df)[colnames(df) == "TestRITScore.2"] <- 'end_rit'
+      df<-mutate(df, end_rit=NA)
+      
+      #percentile
+      colnames(df)[colnames(df) == "TestPercentile"] <- 'baseline_percentile'
+      #colnames(df)[colnames(df) == "TestPercentile.2"] <- 'endpoint_percentile'
+      df<-mutate(df, endpoint_percentile=NA)
+      #goals
+      colnames(df)[colnames(df) == "TypicalGrowth"] <- 'keep_up_goal'
+      colnames(df)[colnames(df) == "CollegeReadyGrowth"] <- 'college_ready_goal'
+      #other
+      #colnames(df)[colnames(df) == growth_status_col_name] <- 'growth_status'
+      #colnames(df)[colnames(df) == name_status_col_name] <- 'name_status'
+      
+    } else {
+      df<- as.data.frame(df$seasonMatched) 
       filter(...) %>%
-      mutate(student_name=paste(StudentFirstname, StudentLastname))
-
-    # Calculate growth statuses
-    df$growth_status[df$TestRITScore.2 >= df$TestRITScore]<-"Positive"
-    df$growth_status[df$TestRITScore.2 >= df$TypicalTarget]<-"Typical"
-    df$growth_status[df$TestRITScore.2 >= df$CollegeReadyTarget]<-"College Ready"
-    df$growth_status[df$TestRITScore.2 < df$TestRITScore]<-"Negative"
+        mutate(student_name=paste(StudentFirstname, StudentLastname))
+      
+      # Calculate growth statuses
+      df$growth_status[df$TestRITScore.2 >= df$TestRITScore]<-"Positive"
+      df$growth_status[df$TestRITScore.2 >= df$TypicalTarget]<-"Typical"
+      df$growth_status[df$TestRITScore.2 >= df$CollegeReadyTarget]<-"College Ready"
+      df$growth_status[df$TestRITScore.2 < df$TestRITScore]<-"Negative"
+      
+      df$name_status<-as.character(df$TestQuartile)
+      df$name_status[df$growth_status=="Negative"]<-"Negative"
+      
+      #season names
+      start_season_abbrev <-unique(df$Season)  
+      end_season_abbrev <-unique(df$Season.2)
+      
+      p_arrow_tiers <- c("Positive", "Typical", "College Ready", "Negative")
+      
+      #set default settings if not provided 
+      if(missing(p_arrow_colors)) p_arrow_colors <- c("tan4", "snow4", "gold", "red")
+      if(missing(p_name_colors)) p_name_colors <- c("red", "#f3716b", "#79ac41", "#1ebdc2", "#a57eb8")
+      if(missing(p_name_color_tiers)) p_name_color_tiers<-c("Negative", "1","2","3","4")
+      
+      
+      #copy the sort column to a new column
+      df$sort_column <- df[ , "TestRITScore"]
+      #data transformations
+      #haid plot is self-munging!
+      #the theory here is that it is easier to work inside of ggplot's calling environment
+      #IF YOU KNOW WHAT THINGS ARE CALLED.  so let's have the user pass a series of identifiers
+      #that indicate which column in their df has key data.  then we'll rename the headers of
+      #the passed df so that our transformations and ggplot calls can be as simple as possible. 
+      
+      #colnames(df)[colnames(df) == student_col_name] <- 'student_name'
+      #RIT
+      colnames(df)[colnames(df) == "TestRITScore"] <- 'base_rit'
+      colnames(df)[colnames(df) == "TestRITScore.2"] <- 'end_rit'
+      #percentile
+      colnames(df)[colnames(df) == "TestPercentile"] <- 'baseline_percentile'
+      colnames(df)[colnames(df) == "TestPercentile.2"] <- 'endpoint_percentile'
+      #goals
+      colnames(df)[colnames(df) == "TypicalGrowth"] <- 'keep_up_goal'
+      colnames(df)[colnames(df) == "CollegeReadyGrowth"] <- 'college_ready_goal'
+      #other
+      #colnames(df)[colnames(df) == growth_status_col_name] <- 'growth_status'
+      #colnames(df)[colnames(df) == name_status_col_name] <- 'name_status'
+      
+    } 
     
-    df$name_status<-as.character(df$TestQuartile)
-    df$name_status[df$growth_status=="Negative"]<-"Negative"
     
-    #season names
-    start_season_abbrev <-unique(df$Season)  
-    end_season_abbrev <-unique(df$Season.2)
-    
-    p_arrow_tiers <- c("Positive", "Typical", "College Ready", "Negative")
-    
-    #set default settings if not provided 
-    if(missing(p_arrow_colors)) p_arrow_colors <- c("tan4", "snow4", "gold", "red")
-    if(missing(p_name_colors)) p_name_colors <- c("red", "#f3716b", "#79ac41", "#1ebdc2", "#a57eb8")
-    if(missing(p_name_color_tiers)) p_name_color_tiers<-c("Negative", "1","2","3","4")
-  
-    
-    #copy the sort column to a new column
-    df$sort_column <- df[ , "TestRITScore"]
-    #data transformations
-    #haid plot is self-munging!
-    #the theory here is that it is easier to work inside of ggplot's calling environment
-    #IF YOU KNOW WHAT THINGS ARE CALLED.  so let's have the user pass a series of identifiers
-    #that indicate which column in their df has key data.  then we'll rename the headers of
-    #the passed df so that our transformations and ggplot calls can be as simple as possible. 
-    
-    #colnames(df)[colnames(df) == student_col_name] <- 'student_name'
-    #RIT
-    colnames(df)[colnames(df) == "TestRITScore"] <- 'base_rit'
-    colnames(df)[colnames(df) == "TestRITScore.2"] <- 'end_rit'
-    #percentile
-    colnames(df)[colnames(df) == "TestPercentile"] <- 'baseline_percentile'
-    colnames(df)[colnames(df) == "TestPercentile.2"] <- 'endpoint_percentile'
-    #goals
-    colnames(df)[colnames(df) == "TypicalGrowth"] <- 'keep_up_goal'
-    colnames(df)[colnames(df) == "CollegeReadyGrowth"] <- 'college_ready_goal'
-    #other
-    #colnames(df)[colnames(df) == growth_status_col_name] <- 'growth_status'
-    #colnames(df)[colnames(df) == name_status_col_name] <- 'name_status'
     
     
   } else {
@@ -199,7 +255,8 @@ haid_plot <- function(
   df$endpoint_quartile <- 1 + floor(df$endpoint_percentile / 25)
   
   #tag rows pos / neg change
-  df$neg_flag <- ifelse(df$end_rit <= df$base_rit, 1, 0)
+  if(single_season_flag) df$neg_flag<-0
+  else df$neg_flag <- ifelse(df$end_rit <= df$base_rit, 1, 0)
   
   #tag names
   df$student_name_format <- ifelse(df$neg_flag == 1, df$student_name, paste0(df$student_name, " ", 
@@ -250,7 +307,7 @@ haid_plot <- function(
   start_qs <- unique(na.omit(df$baseline_quartile))
   end_qs <- unique(na.omit(df$endpoint_quartile))
   missing_qs <- end_qs[!(end_qs %in% start_qs)]
-  
+  if(length(end_qs)==0) missing_qs<-start_qs  
   #loop over missing qs and insert an empty row into the data frame
     #dummy row
     foo <- df[1, ]  
@@ -341,7 +398,8 @@ haid_plot <- function(
       ,hjust = 0.5
       ,vjust = 0
       ,alpha=p_alpha
-    )
+    ) +  
+    scale_color_identity()  
   
   #only do the following if there is data in end rit
   if (sum(!is.na(df$end_rit)) > 0) {
@@ -356,8 +414,7 @@ haid_plot <- function(
           ,color = arrow_color_identity
         )
         ,arrow = arrow(length = unit(0.1,"cm"))
-      ) + 
-      scale_color_identity()  
+      ) 
 
     #add RIT text
     p <- p +
@@ -468,7 +525,7 @@ haid_plot <- function(
     ,dummy_y =  'y_order'
   )  
   start_labels$base_quartile_format <- paste('Quartile', start_labels$baseline_quartile)
-    
+  
   #repeat for end quartile
   end_labels <- get_group_stats(
     df = df[!is.na(df$end_rit) & df$student_name_format != ' ', ]
@@ -483,10 +540,16 @@ haid_plot <- function(
   }
   
   #calculate x position
-  calc_df <- df[!is.na(df$base_rit) & !is.na(df$end_rit), ]
-  quartile_label_min <- round_any(min(c(calc_df$base_rit, calc_df$end_rit)) - 10, 10, floor) + 10
-  quartile_label_max <- round_any(max(c(calc_df$base_rit, calc_df$end_rit)) + 10, 10, ceiling) - 10 
-
+  if(single_season_flag){
+    calc_df <- df[!is.na(df$base_rit), ]
+    quartile_label_min <- round_any(min(calc_df$base_rit) - 10, 10, floor) + 10
+    quartile_label_max <- round_any(max(calc_df$base_rit) + 10, 10, ceiling) - 10 
+  } else {
+    calc_df <- df[!is.na(df$base_rit) & !is.na(df$end_rit), ]
+    quartile_label_min <- round_any(min(c(calc_df$base_rit, calc_df$end_rit)) - 10, 10, floor) + 10
+    quartile_label_max <- round_any(max(c(calc_df$base_rit, calc_df$end_rit)) + 10, 10, ceiling) - 10     
+  }
+  
   #add x position to summary dfs
   start_labels$quartile_label_pos <- NA
   
@@ -661,37 +724,38 @@ haid_plot <- function(
       ,size = annotate_size
     )
   }
-  
-  if (nrow(end_labels[end_labels$endpoint_quartile <= 2, ]) > 0) {
-    p <- p + geom_text(
-      data = end_labels[end_labels$endpoint_quartile <= 2, ]
-     ,aes(
-        x = quartile_label_pos
-       ,y = avg_y_dummy
-       ,label = count_label
-       ,group = base_quartile_format  
-       ,color = color_identity
+  if(!single_season_flag){
+    if (nrow(end_labels[end_labels$endpoint_quartile <= 2, ]) > 0) {
+      p <- p + geom_text(
+        data = end_labels[end_labels$endpoint_quartile <= 2, ]
+        ,aes(
+          x = quartile_label_pos
+          ,y = avg_y_dummy
+          ,label = count_label
+          ,group = base_quartile_format  
+          ,color = color_identity
+        )
+        ,vjust = 0.5
+        ,hjust = 1
+        ,size = annotate_size
       )
-      ,vjust = 0.5
-      ,hjust = 1
-      ,size = annotate_size
-    )
-  }
-  
-  if (nrow(end_labels[end_labels$endpoint_quartile >= 3, ]) > 0) {
-    p <- p + geom_text(
-      data = end_labels[end_labels$endpoint_quartile >= 3, ]
-     ,aes(
-        x = quartile_label_pos
-       ,y = avg_y_dummy
-       ,label = count_label
-       ,group = base_quartile_format  
-       ,color = color_identity
+    }
+    
+    if (nrow(end_labels[end_labels$endpoint_quartile >= 3, ]) > 0) {
+      p <- p + geom_text(
+        data = end_labels[end_labels$endpoint_quartile >= 3, ]
+        ,aes(
+          x = quartile_label_pos
+          ,y = avg_y_dummy
+          ,label = count_label
+          ,group = base_quartile_format  
+          ,color = color_identity
+        )
+        ,vjust = 0.5
+        ,hjust = 0
+        ,size = annotate_size
       )
-      ,vjust = 0.5
-      ,hjust = 0
-      ,size = annotate_size
-    )
+    }
   }
     
   return(p) 

@@ -5,17 +5,16 @@
 #'
 #' @details 
 #' This function builds and prints a bar graph with 4 bins per bar show MAP data
-#' binned by quartile (National Percentil Rank).  Bars are centered at 50th percentile 
+#' binned by quartile (National Percentile Rank).  Bars are centered at 50th percentile 
 #' horizonatally
 #' 
 #' @param .data the data frame in TEAM canoncical style (long data forms)
 #' @param school_name_column column in \code{.data} with school names
 #' @param cohort_name_column  column in \code{.data} with cohornt names
-#' @param academic_year_column column in \code{.data} with academic years
 #' @param grade_level_season_column column in \code{.data} with numeric indicating grade season (e.g., Fall 4th
 #' = 3.3, Winter 4th = 3.7, Spring 4th = 4.0).
 #' @param measurement_scale_column column in \code{.data} with subject
-#' @param percentile_column = column in \code{.data} with NPR.
+#' @param test_percentile_column = column in \code{.data} with NPR.
 #' @param first_and_spring_only indicator for showing shoing Fall-to-Spring rather than Spring-to-Spring
 #' @param justify_widths width justification indicator
 #' @param justify_min 
@@ -25,38 +24,43 @@
 #' @param facets = FALSE
 #' @param facet_opts = FALSE
 #' @param title_text = FALSE
+#' @param small_n_cutoff drop a grade_level_season if less than x% of the max? 
+#' (useful when dealing with weird cohort histories)
 #' 
 #' @return prints a ggplot object
 #' @export
 
 becca_plot <- function(
    .data
+   #for munging data
   ,school_name_column = 'sch_abbr'
   ,cohort_name_column = 'cohort'
-  ,academic_year_column = 'map_year_academic'
   ,grade_level_season_column = 'grade_level_season'
   ,measurement_scale_column = 'measurementscale'
-  ,percentile_column = 'percentile_2011_norms'
+  ,test_percentile_column = 'percentile_2011_norms'
+   #controls if 'extra' data points (fall, winter) get dropped
   ,first_and_spring_only = TRUE
+  ,entry_grades = c(-0.8, 4.2)
   ,auto_justify_x = TRUE
   ,justify_widths = FALSE
   ,justify_min = NA
   ,justify_max = NA
-  ,entry_grades = c(-0.7, 4.3)
   ,color_scheme = 'KIPP Report Card'
   ,facets = FALSE
   ,facet_opts = FALSE
-  ,title_text = FALSE) {
-  
+  ,title_text = FALSE
+  ,small_n_cutoff = .001
+  ) {
+  require(dplyr)
+    
   # Changed passed dataframes' column names to those used throughout 
   # function
   
   colnames(.data)[colnames(.data) == school_name_column] <- 'SCH_ABBREV'
   colnames(.data)[colnames(.data) == cohort_name_column] <- 'COHORT'
-  colnames(.data)[colnames(.data) == academic_year_column] <- 'MAP_YEAR_ACADEMIC'
   colnames(.data)[colnames(.data) == grade_level_season_column] <- 'GRADE_LEVEL_SEASON'
   colnames(.data)[colnames(.data) == measurement_scale_column] <- 'MEASUREMENTSCALE'
-  colnames(.data)[colnames(.data) == percentile_column] <- 'PERCENTILE_2011_NORMS'
+  colnames(.data)[colnames(.data) == test_percentile_column] <- 'PERCENTILE_2011_NORMS'  
 
   #TRANSFORMATION 1 - TRIM
   #trim down the C.data - we don't need all the columns
@@ -64,7 +68,6 @@ becca_plot <- function(
   d1 <- as.data.table(as.data.frame(.data[,c(
      'SCH_ABBREV'
     ,'COHORT'
-    ,'MAP_YEAR_ACADEMIC'
     ,'GRADE_LEVEL_SEASON'
     ,'MEASUREMENTSCALE'
     ,'PERCENTILE_2011_NORMS')]))
@@ -75,10 +78,20 @@ becca_plot <- function(
     #default is Fall K, Fall 5 (aka -0.7, 4.3) - only change if you need to 
     #add an additional entry grade (perhaps 9th?) or to take away 5th
     #(eg for a fully grown KIPP school?)
-    d1 <- d1[GRADE_LEVEL_SEASON %in% entry_grades | GRADE_LEVEL_SEASON %% 1 == 0]
+    d1 <- d1[with(d1, round(GRADE_LEVEL_SEASON, 1) %in% round(entry_grades,1) | GRADE_LEVEL_SEASON %% 1 == 0), ]
   }
   
+  #drop small N time periods
+  by_grade_season <- group_by(.data, GRADE_LEVEL_SEASON)
+  grade_season_counts <- dplyr::summarize(
+    by_grade_season
+   ,n=n()
+  )
+  biggest <- max(grade_season_counts$n)
+  grade_season_counts$include <- grade_season_counts$n >= small_n_cutoff * biggest
+  use_these <- grade_season_counts[grade_season_counts$include==TRUE, 'GRADE_LEVEL_SEASON']
   
+  d1 <- d1[d1$GRADE_LEVEL_SEASON %in% use_these, ]
   
   #calculate quartile from test percentile
   d1[,QUARTILE:=floor((PERCENTILE_2011_NORMS/25) + 1)]
@@ -94,14 +107,12 @@ becca_plot <- function(
   d2<-d1[,list(N_Qrtl=.N), 
          keyby=list(SCH_ABBREV, 
                     COHORT,
-                    MAP_YEAR_ACADEMIC, 
                     GRADE_LEVEL_SEASON, 
                     MEASUREMENTSCALE, 
                     QUARTILE)][
                       d1[,list(.N), 
                          keyby=list(SCH_ABBREV, 
                                     COHORT,
-                                    MAP_YEAR_ACADEMIC, 
                                     GRADE_LEVEL_SEASON, 
                                     MEASUREMENTSCALE)]][,PCT:=round(N_Qrtl/N*100,1)]
 
@@ -134,7 +145,6 @@ becca_plot <- function(
   final_data <- copy(d2[order(MEASUREMENTSCALE, 
                          SCH_ABBREV, 
                          COHORT,
-                         MAP_YEAR_ACADEMIC, 
                          GRADE_LEVEL_SEASON,
                          ORDER)]) 
 
@@ -158,7 +168,6 @@ becca_plot <- function(
                                MIDPOINT=cumsum(PCT) - 0.5*PCT),
                          by=list(SCH_ABBREV, 
                                  COHORT, 
-                                 MAP_YEAR_ACADEMIC, 
                                  GRADE_LEVEL_SEASON, 
                                  MEASUREMENTSCALE)]
   #...and another for those below.
@@ -170,7 +179,6 @@ becca_plot <- function(
                                MIDPOINT=cumsum(PCT) - 0.5*PCT),
                          by=list(SCH_ABBREV, 
                                  COHORT, 
-                                 MAP_YEAR_ACADEMIC, 
                                  GRADE_LEVEL_SEASON, 
                                  MEASUREMENTSCALE)]
   

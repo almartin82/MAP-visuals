@@ -5,7 +5,7 @@
 \usage{
 \method{plot}{mapvizierSummary}(x, growthseason = "Fall - Spring",
   subjects = c("Reading", "Mathematics", "General Science"),
-  grades = c(2:8), years = NULL, metric = "Typical")
+  grades = c(2:8), years = NULL, metric = "Typical", by = "grade")
 }
 \arguments{
 \item{x}{a \code{mapvizierSummary} object}
@@ -31,7 +31,7 @@
 
 \item{years}{integer vector with years of second test year in term names (i.e.,
 to plot results from SY2010-2011, SY 2011-2012, and SY 2012-2013, you should pass the
-vector \code(c(2011, 2012, 2013)) or \code(c(2011:2013))).}
+vector \code{c(2011, 2012, 2013)} or \code{c(2011:2013)}).}
 
 \item{metric}{character value indicating which MAP measurement to plot. Choices are:
 \itemize{
@@ -40,6 +40,10 @@ vector \code(c(2011, 2012, 2013)) or \code(c(2011:2013))).}
 \item "50th" = % Greater than\n50th Percentile, Season 2,
 \item "75th" = % Greater than\75th Percentile, Season 2.
 }}
+
+\item{by}{must be either "grade" or "cohort" indicating if you want metrics grouped by
+grade-level (i.e., all 5th grade's over time) or by cohort (i.e., show class fo 2018's
+performance over time.)}
 }
 \value{
 a \code{gglot2} object
