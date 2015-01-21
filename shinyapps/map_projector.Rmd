@@ -1,0 +1,268 @@
+---
+title: "MAP Projector"
+author: "Chris Haid & Andrew Martin"
+date: "October 1, 2014"
+output: html_document
+runtime: shiny
+---
+####What is this
+__MAP Projector__ uses NWEA's publised norm tables---the [2011 RIT Scale Norms Study Data Files](http://support.nwea.org/node/11789)---to perform a [Markov Process](http://en.wikipedia.org/wiki/Markov_process) simulation of 5,000 potential student trajectories from the RIT scores achieved in the lowest observed grade for the selected subject. (Note: the simulation assumes a fall start date, but not every student's first test event occurs in the fall; the result is that some simulations start too early.  I'll fix that eventually).
+
+You can choose to highlight all simulated paths that end at a given score (say the 75th percentile) in an exiting grade; You can also plot the average path through all the simulated data and through all the highlighted simulations.  You'll notice that a posterior probability of achieving as score at least as the high as the  _highlight cut score_ is given above the visualization.
+
+
+The projected average paths are a simple linear model that fits $y_{s,t} = \alpha +  \beta\times\log(t) + \epsilon_{s,t}$, where $y_{s,t}$ is a simulated RIT score for sample $s$ at time $t$---an indicator of when a simulated assessment occured and the $\epsilon_{s,t} \sim N(0,1)$ are random errors.
+```{r data_prep, echo=FALSE, message=FALSE, warning=FALSE}
+
+# In this chunk we load our packages, data, and do some munging.
+
+# Amazingly, you need only load two packages to makes this bad boy go. 
+require(mapvisuals)
+require(lubridate)
+
+
+#load fake MAP Data
+data(nweamap)
+
+# Vectorize mapvizier::grade_level_season
+gls<-function(x){
+  out<-as.vector(mapply(grade_level_season, x, SIMPLIFY=TRUE))
+  out
+}
+
+# subest for brevity's sake
+subjects<-c("Mathematics", "Reading")
+
+map_results<-nweamap %>% 
+  filter(MeasurementScale %in% subjects, 
+         year(mdy(nweamap$TestStartDate)) >= 2010,
+         Grade>=5
+         ) %>% mapvizier
+
+
+
+students<-map_results$mapData %>% 
+  select(StudentID, StudentLastname, StudentFirstname, Grade) %>%
+  group_by(StudentID, StudentLastname, StudentFirstname) %>%
+  summarize(CurrentGrade=max(Grade)) %>% 
+  mutate(StudentName=paste(StudentLastname, StudentFirstname, sep=", ")) %>%
+  ungroup %>%
+  select(StudentName, StudentID)
+
+stus<-unlist(with(students, split(as.character(StudentID), StudentName)))
+```
+
+#### Inputs
+```{r inputs, echo=FALSE, messages=FALSE, warnings=FALSE}
+
+# This chunk builds up the input panel.  The call to inputPanel() will creat the silverish
+# panel that includes all the input types (in this case, select dropdowns, checkboxes, and a numeric input)
+# The corresponding input function (selectInput(), checkboxInput(), numericInput()) save the selected/inputed
+# values to an object called input and accessed (via input$inputID) in any of the reacitive functions below 
+# used to subset data, generate simulations, and and (re)generate plots 
+
+actionButton("helpButton", label="How This Works")
+
+
+    renderUI({
+      
+      if (input$helpButton %% 2 ==0) return()
+       div(class="alert",
+           "1. Pick a measurement Scale (i.e., a subject to lay people).", br(),
+       "2. Pick a student.", br(),
+       "3. Select at which grade you'd like simulated data to end.", br(),
+       "4. Check any checkbox to draw simulated data and simulated average paths, be patient.", br(),
+       "5. Change the final grade value above which simulated scores are highlighted.", br()
+       )
+      })
+
+
+h5("Select Student Data")
+inputPanel(
+  selectInput("ms", label = "Select Measurement Scale",
+              choices = subjects, selected = "Reading"),
+  
+  selectInput("student", label = "Select Student:",
+               choices = stus)
+  )
+
+h5("Simulated Data Display options")
+inputPanel(
+  selectInput("end_grade", label = "Select Simulation End Grade",
+               choices = c(8:10), selected=10),
+  
+  checkboxGroupInput("overlays","",
+                     choices=c("Show Simulated Data" = "sim_yes", 
+                       "Highlight High end score paths" = "hl_yes",
+                       "Show average path" = "avg_path_yes",
+                       "Show average highlighted path" = "hl_path_yes")),
+    
+  numericInput(inputId = "ontrack_rit", 
+               value=250,
+               label = "Highlight simulated scores at or above:",
+               min = 195, max=300, step=10)
+)
+
+
+```
+
+
+```{r reactive_date, echo=FALSE, messages=FALSE, warnings=FALSE}
+
+# This chunk contains all "reactive" elements that aren't directly pasted to a renderX function:  data, 
+# variables, and the simulation itself.  Each of these objects is a reactive function: these functions watch 
+# the inputs that will change their value say by sugsetting the data by choosing a student or a measurement 
+# scale.
+
+#Subset map data by sutdent, and subject, add a grade_level_season measure
+plot_data <- reactive({
+  plot_data <- map_results$mapData %>% 
+    filter(StudentID==as.integer(input$student), 
+    MeasurementScale==input$ms) %>%
+    mutate(GradeSeason=Grade + gls(Season))
+  plot_data 
+})
+
+#Get minimum grade from plot_data to start simulation
+start_grade <- reactive({
+    min(plot_data()$Grade)
+})
+
+#Get starting rit form minimum data in map data. used to starting simulation 
+start_rit <- reactive({
+    start_rit<-dplyr::filter(plot_data(), Grade==min(Grade), 
+                             mdy(TestStartDate)==min(mdy(TestStartDate)))
+    start_rit$TestRITScore
+})
+
+#This runs the simulation with mapvizier::norm_sim().  Notice it receives two reactive values (start_grade()
+# and start_rit(), since these are used both here in in the plot) as well as two input values (input$ms and 
+# input$end_grade)
+sim<-reactive({
+  
+  sim<-norm_sim(start.grade=start_grade(), 
+                start.subject = input$ms,
+                end.grade = input$end_grade,
+                start.rit = start_rit()
+                )
+  
+   sim<-sim %>% 
+    data.frame %>% 
+    mutate(Season=ifelse(Season==41,"Fall","Winter"),
+           GradeSeason=StartGrade+gls(Season),
+           TestRITScore=StartRIT)
+  
+    select_vars(names(sim), TestRITScore=StartRIT)
+  
+  sim_high <- filter(sim, GradeSeason==max(GradeSeason)) %>% 
+    mutate(High=TestRITScore>=input$ontrack_rit) %>%
+    select(ID, High)
+  
+  sim <- sim %>% left_join(sim_high, by="ID")
+  sim
+})
+
+proby <- reactive({
+  proby <- filter(sim(), GradeSeason==max(GradeSeason)) %>% data.frame %>%
+    dplyr::summarize(N=n(), Pr=round(sum(High)/N*100,2))
+  proby
+})
+
+```
+
+#### Visualization
+```{r visualization, echo=FALSE, messages=FALSE, warnings=FALSE}
+
+# This chunk renders the ggplot-based visualization. It adds the simuluated paths and highlighted paths
+# via the checkboxInputs above (input$sim_yes and input$hl_yes) as well as the reactive functions sim() and 
+# plot_data()
+
+
+renderText({paste0("Simluated probability that student achieves score higher than ", 
+                   input$ontrack_rit, 
+                   " in highest grade is ", 
+                   proby()$Pr, 
+                   "%")})
+
+renderPlot({
+  
+  # initiats ggplot call using plot_data() reactive function
+  withProgress(message="Drawing graph", value=0.1, {
+    p<-ggplot(plot_data(), aes(x=GradeSeason, y=TestRITScore))
+    incProgress(.2, detail="Initiating plot with student data")
+  
+  if("sim_yes"%in% input$overlays){ # show simulated futures
+    incProgress(.4, detail="Drawing simulated data.")
+    
+    p<-  p + geom_line(data=sim(), 
+              aes(x=GradeSeason, y=TestRITScore, group=ID), 
+              color='gray',
+              alpha=.025) 
+  } 
+  if("hl_yes" %in% input$overlays){ # highlight those futues that end at end_grade and exceed ontrack_rit
+    incProgress(.1, detail=paste("Highlighting paths exceeding", 
+                                  input$ontrack_rit, 
+                                  "by grade", input$end_grade))
+    
+    p <-  p + geom_line(data=filter(sim(), High==TRUE), 
+              aes(x=GradeSeason, y=TestRITScore, group=ID), 
+              color='lightgreen',
+              alpha=.05) 
+  } 
+  if("avg_path_yes" %in% input$overlays){
+    
+    incProgress(.1, detail="Calculating and adding average path.")
+    
+    p <- p + stat_smooth(data=sim(), method=lm, formula=y~log(x), color="#8D8865")
+  }
+  if("hl_path_yes" %in% input$overlays){
+    incProgress(.05, detail="Calculating and adding average highlighted path.")
+    p <- p + stat_smooth(data=filter(sim(), High==TRUE), method=lm, formula=y~log(x), color="#439539")
+  }
+#plot selected students history
+  
+ 
+  
+p <- p + 
+    geom_line(color='blue') +
+    theme_bw() + 
+    ylab("RIT Score") +
+    xlab("Grade") 
+  
+  
+  print(p)
+
+  setProgress(.95, detail="drawing all elements")
+  setProgress(1)
+
+
+    
+  })  
+    
+})
+
+```
+```{r datatable, echo=FALSE}
+tabsetPanel(
+  tabPanel("Simulated Data",
+    # This is simply a JavaScript based sortable, searchable, filterable DataTable using the data returned by
+    # the sim() reactive function.
+    renderDataTable({
+      sim()
+      })
+    ),
+    tabPanel("Student Data",
+             renderDataTable({
+               plot_data()
+               })
+             )
+  )
+
+
+
+
+```
+
+
+
+
