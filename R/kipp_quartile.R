@@ -1,14 +1,3 @@
-
-#
-# Args:
-#   x: a vector of percentiles 
-#   return.factor: boolean indicating wether to return quartiles as a factor, default is TRUE.
-#   proper.quartile: booliean indicating wehter to fix Foundations crazy quaritle, defaul is FALSE
-
-#
-# Returns:
-#   a vector of quartiles 
-
 #' @title Calcualte KIPP Foundation style quartiles from percentile vector
 #'
 #' @description

@@ -66,6 +66,8 @@ s2s_match <- function(.data,
   # If season1=season2, i.e., spring-spring, roll Year2 back one year
   sy1<-sy
   if(season1==season2) sy1 <- sy-1
+  # special check for spring to winter growth
+  if(season1=="Spring" & season2=="Winter") sy1 <- sy-1
   m.1<-filter(.data, Season==season1, Year2==sy1)
   
   # Filter to Season2
@@ -84,7 +86,8 @@ s2s_match <- function(.data,
                                   "FallSpring"   = "R42.x",
                                   "FallWinter"   = "R41.x",
                                   "WinterSpring" = "R12.x",
-                                  "SpringSpring" = "R22.x"
+                                  "SpringSpring" = "R22.x",
+                                  "SpringWinter" = "R22.x",
                                   )
                            )
     if(!as.character(norm.season) %in% names(m.12)) stop(paste(".data is missing a column named", 
@@ -99,8 +102,8 @@ s2s_match <- function(.data,
                               TypicalTarget=TypicalGrowth+TestRITScore.x,
                               MetTypical=TestRITScore.y>=TypicalTarget, 
                               GrowthSeason=paste(Season.x, Season.y, sep=" - ")
-      )
-      )
+                              )
+                 )
     }
     if(college.ready) {
       if(!"KIPPTieredGrowth.x" %in% names(m.12)) stop(paste(".data is missing a column named", 
@@ -115,6 +118,18 @@ s2s_match <- function(.data,
                                 MetCollegeReady=TestRITScore.y>=CollegeReadyTarget
       )
       )
+    }
+    # Adjust Spring-to-winter growth to be half of spring to spring and 
+    # adjust typical and CR goals and targets
+    if(seasons=="SpringWinter"){
+      m.12 <- m.12 %>%
+        mutate(TypicalGrowth = round(TypicalGrowth/2),
+               CollegeReadyGrowth = round(CollegeReadyGrowth/2),
+               TypicalTarget = TestRITScore.x+TypicalGrowth,
+               CollegeReadyTarget=TestRITScore.x+CollegeReadyGrowth,
+               MetTypical=TestRITScore.y>=TypicalTarget,
+               MetCollegeReady=TestRITScore.y>=CollegeReadyTarget
+               )
     }
   }  
   
