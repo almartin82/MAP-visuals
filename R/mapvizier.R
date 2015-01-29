@@ -101,8 +101,18 @@ mapvizier.default <- function(x){
                            college.ready=T
   )
   )
+  map.SW<-rbindlist(lapply(years, 
+                           mapvisuals::s2s_match, 
+                           .data=map.all, 
+                           season1="Spring", 
+                           season2="Winter", 
+                           typical.growth=T,
+                           college.ready=T
+  )
+  )
   
-  map.all.growth<-rbindlist(list(map.SS, map.FS, map.FW, map.WS, map.FF))
+  
+  map.all.growth<-rbindlist(list(map.SS, map.FS, map.FW, map.WS, map.FF, map.SW))
   
   # add to mapviz object
   
