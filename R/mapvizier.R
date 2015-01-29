@@ -101,9 +101,9 @@ mapvizier.default <- function(x){
                            college.ready=T
   )
   )
-  map.SW<-rbindlist(lapply(years, 
+  map.SW<-rbindlist(lapply(year_list, 
                            mapvisuals::s2s_match, 
-                           .data=map.all, 
+                           .data=map_data, 
                            season1="Spring", 
                            season2="Winter", 
                            typical.growth=T,
