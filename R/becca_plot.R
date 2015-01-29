@@ -91,7 +91,7 @@ becca_plot <- function(
   grade_season_counts$include <- grade_season_counts$n >= small_n_cutoff * biggest
   use_these <- grade_season_counts[grade_season_counts$include==TRUE, 'GRADE_LEVEL_SEASON']
   
-  d1 <- d1[d1$GRADE_LEVEL_SEASON %in% use_these, ]
+  d1 <- d1[d1$GRADE_LEVEL_SEASON %in% use_these$GRADE_LEVEL_SEASON, ]
   
   #calculate quartile from test percentile
   d1[,QUARTILE:=floor((PERCENTILE_2011_NORMS/25) + 1)]
