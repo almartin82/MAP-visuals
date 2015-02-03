@@ -130,7 +130,8 @@ strands_plot<-function(.data, ...) {
   m.melt.scores<-reshape::melt(m.sub.scores, 
                       id.vars=names(m.sub.scores)[1:9], 
                       measure.vars = names(m.sub.scores)[-c(1:9)]
-  )
+  ) %>% 
+    mutate(value=as.numeric(value))
   
   m.melt.names<-reshape::melt(m.sub.names, 
                      id.vars=names(m.sub.names)[1:9],
