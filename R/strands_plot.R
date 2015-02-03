@@ -92,7 +92,17 @@ strands_plot<-function(.data, ...) {
     .data<-dplyr::filter(.data, ...)
   }
 
-  
+  # return text_grob if not enough data
+  if(nrow(.data)==0){
+    p_bad <- arrangeGrob(grid.text(lable="Insufficient data :-<", 
+                                   draw=FALSE
+                                   ),
+                         nrow=1, 
+                         ncol=1)
+    
+    # early return
+    return(p_bad)
+  }
   # Munging, need to get scores and names into long format
   
   
