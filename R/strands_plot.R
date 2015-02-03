@@ -16,8 +16,8 @@
 #' @param x a \code{mapvizier} object or data.frame with the following columns:
 #' \itemize{
 #'  \item  StudentID,
-#'  \item StudentFirstname,
-#'  \item StudentLastname,
+#'  \item StudentFirstName,
+#'  \item StudentLastName,
 #'  \item SchoolInitials,
 #'  \item Grade,
 #'  \item MeasurementScale,
@@ -53,8 +53,8 @@ strands_plot<-function(.data, ...) {
   } else {
     # validation
     required_cols<-c("StudentID",
-                      "StudentFirstname",
-                      "StudentLastname",
+                      "StudentFirstName",
+                      "StudentLastName",
                       "SchoolInitials",
                       "Grade",
                       "MeasurementScale",
@@ -98,8 +98,8 @@ strands_plot<-function(.data, ...) {
   
   m.sub.scores<-dplyr::select(.data, 
                                StudentID,
-                               StudentFirstname,
-                               StudentLastname,
+                               StudentFirstName,
+                               StudentLastName,
                                SchoolInitials,
                                Grade,
                                MeasurementScale,
@@ -114,8 +114,8 @@ strands_plot<-function(.data, ...) {
   
   m.sub.names<-dplyr::select(.data, 
                               StudentID,
-                              StudentFirstname,
-                              StudentLastname,
+                              StudentFirstName,
+                              StudentLastName,
                               SchoolInitials,
                               Grade,
                               MeasurementScale,
@@ -160,7 +160,7 @@ strands_plot<-function(.data, ...) {
                       Grade,
                       MeasurementScale) %>%
              mutate(
-                    StudentFullName=paste(StudentFirstname, StudentLastname),
+                    StudentFullName=paste(StudentFirstName, StudentLastName),
                     StudentDisplayName=factor(StudentFullName, 
                                                levels=unique(StudentFullName)[order(Rank,decreasing = TRUE)])  
                     )
