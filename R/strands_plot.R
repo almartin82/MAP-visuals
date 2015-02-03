@@ -94,7 +94,7 @@ strands_plot<-function(.data, ...) {
 
   # return text_grob if not enough data
   if(nrow(.data)==0){
-    p_bad <- arrangeGrob(grid.text(lable="Insufficient data :-<", 
+    p_bad <- arrangeGrob(grid.text(label = "Insufficient data :-<", 
                                    draw=FALSE
                                    ),
                          nrow=1, 
