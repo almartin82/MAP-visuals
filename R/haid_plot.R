@@ -147,6 +147,7 @@ haid_plot <- function(
       #colnames(df)[colnames(df) == name_status_col_name] <- 'name_status'
       
     } else {
+      single_season_flag <- FALSE
       df<- as.data.frame(df$seasonMatched) %>% 
       filter(...) %>%
         mutate(student_name=paste(StudentFirstName, StudentLastName))
