@@ -101,7 +101,7 @@ haid_plot <- function(
       single_season_flag <- TRUE
       df<-as.data.frame(df$mapData) %>%
         filter(...) %>%
-        mutate(student_name=paste(StudentFirstname, StudentLastname),
+        mutate(student_name=paste(StudentFirstName, StudentLastName),
                growth_status="Positive",
                name_status=TestQuartile)
       
@@ -149,7 +149,7 @@ haid_plot <- function(
     } else {
       df<- as.data.frame(df$seasonMatched) %>% 
       filter(...) %>%
-        mutate(student_name=paste(StudentFirstname, StudentLastname))
+        mutate(student_name=paste(StudentFirstName, StudentLastName))
       
       # Calculate growth statuses
       df$growth_status[df$TestRITScore.2 >= df$TestRITScore]<-"Positive"
